@@ -2,6 +2,8 @@
 package wikibinator.impl;
 import static wikibinator.fn.*;
 import static wikibinator.impl.Cache.*;
+
+import wikibinator.Wiki;
 import wikibinator.fn;
 
 public class SimpleFn<T> implements fn<T>{

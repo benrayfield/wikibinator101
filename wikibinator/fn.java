@@ -1,5 +1,5 @@
+/** Ben F Rayfield offers this software opensource MIT license */
 package wikibinator;
-
 import java.util.function.UnaryOperator;
 
 /** function, the core object type. The generic T in fn<T> is normally LazyBlob
@@ -8,6 +8,9 @@ or any representation of a cbt (complete binary tree of pairs of pairs... of T a
 but LazyBlob is all those things.
 */
 public interface fn<T> extends UnaryOperator<fn>{
+	
+	//TODO should LazyBlob and Compiled go in the same generic T of fn<T>
+	//or should fn have 2 fields for those 2 things?
 	
 	/** UnaryOperator<fn>. just calls e(fn). Its important for names you use alot to be short. */
 	public default fn apply(fn param){
