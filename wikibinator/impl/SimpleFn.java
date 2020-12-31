@@ -39,9 +39,9 @@ public class SimpleFn<T> implements fn<T>{
 		this.cbt = cbt;
 	}
 
-	public fn L(){ return func; }
+	public fn L(){ return func!=null ? func : I; }
 
-	public fn R(){ return param; }
+	public fn R(){ return param!=null ? param : this; }
 
 	public byte op(){ return op; }
 
@@ -74,7 +74,7 @@ public class SimpleFn<T> implements fn<T>{
 		case 0b000000:
 		}*/
 	
-		fn x = L().L().R(), y = L().R(), z = param; //the 3 params of each of 8 ops
+		fn x = L().R(), y = R(), z = param; //the 3 params of each of 8 ops
 		switch(opOfCall&7){ //8 opcodes, though some of them use the next 2 bits like opcodes
 		case opS:
 			return x.e(z).e(y.e(z));
@@ -98,7 +98,8 @@ public class SimpleFn<T> implements fn<T>{
 		break;	
 		case opSecondLastInList:
 			if(z.R().R().isLeaf()) return z.L();
-			return this.e(z.R()); //this fn (in the call <this,z>) is a function that gets second last in a linkedlist
+			//return this.e(z.R()); //this fn (in the call <this,z>) is a function that gets second last in a linkedlist
+			return secondLastInList.e(z.R());
 		break;
 		case opCurry:
 			//Curry x y z //(Curry counter linkedList nextParam)
@@ -111,9 +112,11 @@ public class SimpleFn<T> implements fn<T>{
 				fn counterAsOneLess = x.R();
 				return curry.e(counterAsOneLess).e(nextLinkedList); //wait for next param to curry again or eval
 			}
-		break;	
-		case opImport:
-			return Wiki.wiki.apply(param);
+		break;
+		case opWiki:
+			/*before calling wiki function, check isDirty(byte) and if !isDirty then eval to (S I I (S I I)). call fnThatInfiniteLoopsForAllPossibleParams=(S (T (S I I)) (T (S I I))) or something like that maybe using lazig on 2 of (S I I)... or simply call (S I I) on itself aka callParamOnItself.e(callParamOnItself)... or just inline it as S.e(I).e(I).e(S.e(I).e(I)); */
+			if(!isDirty(this.op)) return S.e(I).e(I).e(S.e(I).e(I)); //infloop so anything that halts is deterministic
+			return Wiki.wiki.apply(param); //allow nondeterminism (forkEdit wiki) as long as (L x (R x)) equals x, forall x.
 		break;
 		default:
 			throw new RuntimeException("this can never happen but is here in case java doesnt know that");

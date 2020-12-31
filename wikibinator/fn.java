@@ -144,6 +144,17 @@ public interface fn<T> extends UnaryOperator<fn>{
 		opPair = 4,
 		opSecondLastInList = 5,
 		opCurry = 6,
-		opImport = 7;
+		opWiki = 7;
+	
+	
+	/** TODO derive a fn which computes getComment instead of hardcoding it here */
+	public static fn getComment(fn anyVarargLambda){
+		throw new RuntimeException("cur(anyVarargLambda)==5 and the first 3 params are the 3 bits of opCurry and param 5 of 5 is a linkedlist of at least size 1, then the last thing in that linkedlist is the COMMENT (and second last thing in that linkedlist (if its size is at least 2) is funcBody, and after that in reverse order are curried params of that funcBody. Else the comment is u.");
+	}
+	
+	/** TODO derive a fn which computes setComment instead of hardcoding it here. */
+	public static fn setComment(fn any, fn comment){
+		throw new RuntimeException("TODO, counterpart of getComment, and if its not a vararg lambda already, wraps it in one which computes the same thing as it (other than reflection by L R IsLeaf which would see that its wrapped.");
+	}
 
 }
