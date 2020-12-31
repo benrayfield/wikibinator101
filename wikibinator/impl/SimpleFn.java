@@ -3,16 +3,17 @@ package wikibinator.impl;
 import static wikibinator.fn.*;
 import static wikibinator.impl.Cache.*;
 
+import wikibinator.Compiled;
 import wikibinator.Wiki;
 import wikibinator.fn;
 
-public class SimpleFn<T> implements fn<T>{
+public class SimpleFn implements fn{
 	
 	public final byte op;
 	
-	public final fn<T> func, param;
+	public final fn func, param;
 	
-	protected T cbt;
+	protected Compiled compiled = interpretedMode;
 	
 	/** u/theUniversalFunction with isForceDeterminism */
 	public SimpleFn(){
@@ -36,6 +37,13 @@ public class SimpleFn<T> implements fn<T>{
 		this.op = op;
 		this.func = func;
 		this.param = param;
+		
+		//TODO optimize. "this.func = func!=null ? I : this" is infloop cuz I is derived
+		//by calling these constructors (what if it was its own class? then could do this optimization,
+		//to just return func from L() and return param from R() and them still be final.
+		//this.func = func!=null ? I : this;
+		//this.param = param!=null ? param : this;
+		
 		this.cbt = cbt;
 	}
 
@@ -45,13 +53,17 @@ public class SimpleFn<T> implements fn<T>{
 
 	public byte op(){ return op; }
 
-	public T cbt(){ return cbt; }
+	public Compiled compiled(){ return compiled; }
 	
 	//FIXME need dedup map. its in Cache.java (TODO)
 	
-	
-	
 	public fn e(fn param){
+		return compiled.apply(this, param);
+	}
+	
+	
+	//public fn e(fn param){
+	public static final Compiled interpretedMode = (fn func, fn param)->{
 		//FIXME add <func,param,return> to Cache just before return, if not returning from Cache already
 		
 		byte opOfCall = fn.op(op, param.op()); //same as new SimpleFn(this,param).op()
@@ -86,11 +98,10 @@ public class SimpleFn<T> implements fn<T>{
 			return z;
 		break;
 		case opReflect:
-			if(x.isLeaf())){
+			if(x.isLeaf()){
 				return z.isLeaf() ? T : F;
-			}else{ //!isLeaf(x.op())
-				if(y.isLeaf()) z.L();
-				else z.R();
+			}else{ //!x.isLeaf
+				return y.isLeaf() ? z.L() : z.R();
 			}
 		break;
 		case opPair:
@@ -106,6 +117,7 @@ public class SimpleFn<T> implements fn<T>{
 			//--ifItsEnoughCurriesToEval--> (LastInList next_linkedList next_linkedList).
 			fn nextLinkedList = pair.e(z).e(y); //y is linkedList. z is nextParam.
 			if(x.isLeaf()){ //x is counter and has counted down to 0 (such as (T (T (T u))) is 3 and u is 0. Eval.
+				"FIXME should that be x.R().isLeaf(), and what if x is already leaf? this is an offby1error"
 				fn funcBody = secondLastInList.e(nextLinkedList);
 				return funcBody.e(nextLinkedList);
 			}else{ //has not counted down to 0 yet, so count down 1 more and add nextParam to linkedlist
@@ -121,6 +133,22 @@ public class SimpleFn<T> implements fn<T>{
 		default:
 			throw new RuntimeException("this can never happen but is here in case java doesnt know that");
 		}
+	};
+
+	public fn e(){
+		if(fn.isHalted(op)) return this;
+		//(L x (R x)) equals x, forall x. If this parent node is not halted,
+		//then eval one child on the other to derive parent.
+		return L().e(R());
+	}
+
+	public fn f(fn param){
+		//just create the call pair without evaling it.
+		//This is BigO(heightOfForest) to eval, like in iotavm (see benrayfields github project iotavm),
+		//instead of the BigO(1) smaller pieces of work like in occamsfuncer callquad,
+		//but if using java stack to do it, its still bigO(1) but I mean the algorithm as self contained
+		//without the java stack optimization. So this is actually fast to call.
+		return cp(this,param);
 	}
 	
 

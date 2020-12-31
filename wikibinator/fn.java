@@ -3,11 +3,12 @@ package wikibinator;
 import java.util.function.UnaryOperator;
 
 /** function, the core object type. The generic T in fn<T> is normally LazyBlob
-and is where you put optimizations, or it might also be int[] or byte[] or double[]
+(UPDATE: should be Compiled.java which may contain LazyBlob andOr various other optimizations)
+andis where you put optimizations, or it might also be int[] or byte[] or double[]
 or any representation of a cbt (complete binary tree of pairs of pairs... of T and F as bits),
 but LazyBlob is all those things.
 */
-public interface fn<T> extends UnaryOperator<fn>{
+public interface fn extends UnaryOperator<fn>{
 	
 	//TODO should LazyBlob and Compiled go in the same generic T of fn<T>
 	//or should fn have 2 fields for those 2 things?
@@ -57,7 +58,9 @@ public interface fn<T> extends UnaryOperator<fn>{
 	public byte op();
 	
 	/** bits of cbt, or null if this is not a cbt or is not optimized as such a wrapper. See comment of this class. */
-	public T cbt();
+	public Compiled compiled();
+	
+	public void setCompiled();
 	
 	public static byte op(byte leftOp, byte rightOp){
 		//TODO optimize using byte[1<<16]? Or is this faster? Probably this (computing it every time
