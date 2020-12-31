@@ -1,7 +1,7 @@
 # wikibinator
 A decentralized wiki style interactive math book, based on a combinator (that is both a universal lambda function and a pattern calculus function of 6 parameters) in which it is extremely easier to say true things than to say false things, based on a logic similar to godel-number where one must commit to statements about lambda called on lambda returns lambda before one can verify which lambdas they are, and in theory scaleable enough for graphics, musical instruments, GPU number crunching, etc, but lets start simple, so everyone can understand and fit the pieces of the puzzle together.
 
-
+```
 The 8 opcodes, chosen in the first 3 of 6 parameters...
 
 S x y z //(x z (y z))
@@ -17,8 +17,10 @@ Import z //this is where to hook in plugins, to modify the possible behaviors of
 cacheByte with isForceDeterminism as high bit, and the low 7 bits are the cache.\
 But more likely isForceDeterminism is not part of node itself but is part of NondetNode???
 
-I'm undecided if it will be 6 vs 7 parameters since a comment parameter (in the middle of the 7 parameters of the universal combinator) might make it much easier for people to understand, vs it might be easy enough deriveable in the VARARG LAMBDAS of the Curry opcode.
-
+I'm undecided if it will be 6 vs 7 parameters since a comment parameter (in the middle of the 7 parameters
+of the universal combinator) might make it much easier for people to understand, vs it might be easy enough
+deriveable in the VARARG LAMBDAS of the Curry opcode.
+```
 
 --- below is disorganized text which lead to this... ---
 
