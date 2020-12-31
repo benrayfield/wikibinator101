@@ -26,6 +26,7 @@ deriveable in the VARARG LAMBDAS of the Curry opcode.
 
 --- below is disorganized text which lead to this... ---
 
+The below text is easier to understand if you view it in github "raw" or a plain text viewer, instead of as html which turns newlines into spaces...
 
 
 TODO examples of java code of how to use N as treemap to get functions,
