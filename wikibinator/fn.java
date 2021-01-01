@@ -1,48 +1,122 @@
-/** Ben F Rayfield offers this software opensource MIT license */
 package wikibinator;
+import static wikibinator.impl.ImportStatic.*;
 import java.util.function.UnaryOperator;
+import wikibinator.Compiled;
+//TODO import immutable.lazycl.Blob;
 
-/** function, the core object type. The generic T in fn<T> is normally LazyBlob
-(UPDATE: should be Compiled.java which may contain LazyBlob andOr various other optimizations)
-andis where you put optimizations, or it might also be int[] or byte[] or double[]
-or any representation of a cbt (complete binary tree of pairs of pairs... of T and F as bits),
-but LazyBlob is all those things.
-*/
-public interface fn extends UnaryOperator<fn>{
+public strictfp interface fn extends UnaryOperator<fn>, /*Blob,*/ ob{
 	
-	//TODO should LazyBlob and Compiled go in the same generic T of fn<T>
-	//or should fn have 2 fields for those 2 things?
+	/*TODO use binheap indexing to do what Blob does for a linear range, instead of implementing Blob?
+	Im thinking of storing the first n bits in each cbt in all higher binary forest nodes,
+	which would mean those n bits, an optimization specialized in cbts (pair of pair of pair... of T vs F).
+	or something like that.
 	
-	/** UnaryOperator<fn>. just calls e(fn). Its important for names you use alot to be short. */
+	TODO put into Wiki.wiki the spend/wallet/solve/etc ops (how to make all possible calls halt within chosen time limit etc),
+	or specificly put into wiki <func,param,return> cache entries (<func,param> is primaryKey, and return is value,
+	and each <func,param> never changes its value after its first observed except by accidental lack of sync etc
+	and such conflicts should statistically converge to a consistent model of the world and space of possibilities
+	as measured by (L x (R x)) equals x forall x (such as (L u)->I and (R u)->u and (I u)->u).
+	*/
+	
+	
+	/**
+	//L and R functions removed. Derive them by combons of the universal function,
+	//save them in 2 vars named fn L and fn R, and use L.e(this) and R.e(this).
+	//cuz, what if you dont really need those but you want a 4096 way tree instead, in some cases?
+	//Put things in the <func,param,return> cache so that when L and R are called on this,
+	//they will know this's L and R are those things.
+	???
+	No, put the L() and R() funcs here....
+	Or more generally binheap indexing (like in urbit) where 1 is this, 2 is L(), 3 is R(),
+	4 is L().L(), 7 is R().R(), and in general the left child of index x is 2*x
+	and the right child of index x is 2*x+1.
+	Remember, a cbt/Blob is made of (pair x y) aka ((pair x) y) so is twice as deep as you might expect
+	so is more like an int binheapIndex but costs a long.
+	I'm creating a function just for that, which skips the (pair x) and branches directly to L().R() or R() with each bit,
+	and this function is G(long cbtBinheapIndex).
+	*
+	public fn L();
+	public fn R();
+	*/
+	public fn g(long binheapIndex);
+			
+	/** same as g(binheapIndexFirst).g(binheapIndexSecond) but does not necessarily create
+	the fn returned by g(binheapIndexFirst) as the middle step.
+	An up to 127 bit binheapIndex. Can reach approx as deep as G(long) if this is a cbt,
+	and you want to get from a pair to a pair, but this is more flexible, and slower.
+	If you want complete control of the path through L() and R() in something of exabit size, use this.
+	*/
+	public default fn gg(long binheapIndexFirst, long binheapIndexSecond){
+		return g(binheapIndexFirst).g(binheapIndexSecond);
+	}
+	
+	/** similar to g(long) except this branches to L().R() vs R(), compared to g(long) branches to L() vs R(),
+	so this can index individual bits in an exabit size bitstring, though that doesnt mean it can be efficiently stored.
+	Remember, a cbt/Blob is made of (pair x y) aka ((pair x) y) so is twice as deep as you might expect unless you use this.
+	*/
+	public fn G(long cbtBinheapIndex);
+	
+	public default fn L(){
+		return g(2L);
+	}
+	
+	public default fn R(){
+		return g(3L);
+	}
+	
+	/** same as L().R(). This is an optimization for getting x out of ((pair x) y) aka (pair x y)
+	without (pair x) having to exist.
+	*/
+	public default fn LR(){
+		return G(2L);
+		//return g(0b110L); is that right? reverse the high/low bit order (excluding the highest 1 bit) or not?
+	}
+	
+	
+	
+	public default fn e(fn param){
+		//TODO make sure Compiled does the get() automatically if !compiled().on(): return compiled().get().apply(this,param);
+		return compiled().apply(this,param);
+	}
+	
 	public default fn apply(fn param){
 		return e(param);
 	}
 	
-	
-	/** lambda call. The e means eval. */
-	public fn e(fn param);
-	
-	/** finish evaling this, if its not already halted. Calling this.e(fn) doesnt ned another .e()
-	cuz that finishes evaling. If you want a lazyEval like in occamsfuncer (other than deriving that at user level)
-	then name it f(fn) similar to e(fn) and use a step (debuggerStepInto andOr debuggerStepOver)
-	like in occamsfuncer's OcfnUtil.
-	*/
-	public fn e();
-	
-	/** I'm undecided if will have this function. Its a lazy call (ot her than deriving that at user level)
-	similar to step func doing debuggerStepInto andOr debuggerStepOver in occamsfuncer's OcfnUtil.
-	*/
-	public fn f(fn param);
-	
-	/** (L x (R x)) equals x, forall x. */
-	public fn L();
-	
-	/** (L x (R x)) equals x, forall x. */
-	public fn R();
-	
-	/** Normally used in a switch statement.
-	The combinator/universalFunction u takes 6 params. It has 0-6 params, or 0-5 if you dont
-	create an object to represent the evaling (like happens in occamsfuncer callquad).
+	/** You can check if this is u or not (the node which all binary forest paths lead to)
+	as it is 2 specific byte values (depending if isDirty vs !isDirty in the highest bit in that byte).
+	Everything else in this byte (the low 7 bits) are cache, including to check if it is halted or not,
+	which is a fact of any specific binary forest shape. There is no time in this system,
+	only <func,param,return> cache entries,
+	and everything else in the system (such as the semantic that the last thing in a linkedlist is a comment
+	and may contain icon pixels, unicode text, andOr anything else you like,
+	and the second last thing in a linkedlist is funcBody (called on that linkedlist which contains funcBody
+	so it has a simple way to do recursion), but only if its used in a Curry opcode)
+	... "everything else in the system"... is to more conveniently and efficiently and intuitively
+	use combos of <func,param,return> cache entries. These accumulate like a sparse bloom filter
+	and may just as easily be uncached/forgotten and later derived again,
+	except some parts of Wiki.wiki (a UnaryOperator<fn> mounted at a certain forest node of 5 curries)
+	can not be derived other than if many people and computers happen to believe them
+	and they fit together with the rest of the <func,param,return> cache entries
+	across the world (even across physical multiverse branches of this physical reality
+	if that is ever discovered how to do that, this system will not miss a step,
+	will have no errors due to being used in that way, such as if you "go back in time and kill your grandfather
+	before he impregnates your grandmother leading to you" and during that <func,param,return>
+	cache entries are created, and many points along that pbrane (which might be mobius-like
+	<func,param,return> cache entries are created, the logic is the same nomatter
+	what happens before, after, or in whatever combos. A func called on a param gives the same return
+	nomatter what, if it is converged correctly)... but more practically,
+	its a way of converging toward any consistent set of <func,param,return> cache entries
+	which are valid iff (if and only if) forall x (L x (R x)) equals x AND
+	the logic in the (BinaryOperator<fn>)SimpleFn.interpretedMode (which can be viewed as a predicate of 3 fn params,
+	the question of does fn called on fn return fn (if it ever returns)
+	and including (S I I (S I I)) as a symbol of "anything which does not halt" (infinite cost to compute in some cases)
+	if one wants to be a perfectionist for every possible <func,param> mapping to exactly 1 value
+	even if we dont know what those values are.
+	<br><br>
+	Normally used in a switch statement.
+	The combinator/universalFunction u takes 6 params. It has 0-6 params, or 0-5 (waiting on 6th before it evals)
+	if you dont create an object to represent the evaling (like happens in occamsfuncer callquad).
 	It evals when it gets to 6. This byte is a bitstring of 0-6 bits, with a high 1 bit, so numbers 1-127,
 	and the sign bit (highest bit) goes above that and means isDirty (if negative) vs isForceDeterminism (if nonnegative),
 	except if the low 7 bits are 0 (is 0 or -128, or if unsigned thats 0 or 128) then it means its evaling
@@ -57,107 +131,23 @@ public interface fn extends UnaryOperator<fn>{
 	*/
 	public byte op();
 	
+	public default boolean isLeaf(){
+		return opIsLeaf(op());
+	}
+	
+	public default boolean isDirty(){
+		return opIsDirty(op());
+	}
+	
+	public default boolean isHalted(){
+		return opIsHalted(op());
+	}
+	
 	/** bits of cbt, or null if this is not a cbt or is not optimized as such a wrapper. See comment of this class. */
 	public Compiled compiled();
 	
-	public void setCompiled();
-	
-	public static byte op(byte leftOp, byte rightOp){
-		//TODO optimize using byte[1<<16]? Or is this faster? Probably this (computing it every time
-		//instead of caching, way) is faster even though that would fit in L2 cpu cache.
-		
-		TODO does leftOp have 6 params (is not halted), and same question for right op?
-		TODO are the low 7 bits of either of them 0, meaning at least 1 of the 2 childs
-		(2 childs of leftOp or 2 childs of rightOp) is not halted?
-		TODO
-		
-		return (byte)(
-			((leftOp|rightOp)&(1<<7)) //sign bit is OR of sign bits
-			| 
-		);
-	}
-	
-	/** isDirty vs isForceDeterminism. If isForceDeterminism (aka !isDirty)
-	then the import/callccUniverse/observer opcode (1 of 8 opcodes) evals to (S I I (S I I)) aka an infinite loop.
-	If isDirty then that function can compute whatever the "wiki" or converging agreement of many people and computers
-	thinks that function should do, as this spec does not define any behaviors of that function
-	other than forall x, (L x (R x)) equals x, which makes it a pattern calculus function
-	(and is also a universal lambda function aka combinator) which is why its called wikibinator.
-	*/
-	public static boolean isDirty(byte op){
-		return (op&0x80)!=0;
-	}
-	
-	/** Range 0-6. Number of params more to curry before this would eval.
-	If 0, is now evaling. If 6, its u (aka the universal function).
-	*/
-	public static int cur(byte op){
-		//TODO optimize using byte[256]? Or is this faster?
-		int i = (op&0x7f); //0..127
-		if(i == 0) return 0;
-		if(i == 1) return 6; //is u
-		return cur((byte)(i>>1))-1; //TODO verify this is not offby1
-	}
-	
-	public static boolean isHalted(byte op){
-		//TODO optimize by not computing which nonzero value cur is, just is it 0 or not.
-		return cur(op)!=0;
-	}
-	
-	/** This is what happens when you call an evaling on an evaling,
-	or a halted on an evaling, or an evaling on a halted.
-	If it just started to eval, then its op would be in range 64-127 (or that minus 128 as the isDirty bit).
-	*/
-	public static boolean areLow7BitsOfOpAll0(byte op){
-		return (op&0x7f)==0;
-	}
-	
-	public static boolean isLeaf(byte op){
-		return (op&0x7f)==1;
-	}
-	
-	public default boolean isLeaf(){
-		return fn.isLeaf(op());
-	}
-	
-	/*
-	he 8 opcodes, chosen in the first 3 of 6 parameters...
-
-	S x y z //(x z (y z))
-	T y z //y
-	FI y z //z, ... I z is F u z
-	Reflect x y z //x and y define which of 3 things to do (L R IsLeaf) with z, and the cache byte per node does it in 1 step.
-	Pair x y z //(z x y)
-	SecondLastInList z //calls SecondLastInList recursively depending if (IsLeaf (R z)), returns (L z) or recurses into (R z),
-		UPDATE: use second last in list as funcBody,
-		and last in list is comment but has no effect other than L and R and IsLeaf can see it,
-		which is why there will be 6 (instead of 7) params of the universalFunction
-		(no comment param in those, it goes in the vararg lambdas).
-	Curry x y z //(Curry counter linkedList nextParam) --ifItsEnoughCurriesToEval--> (LastInList next_linkedList next_linkedList).
-	Import z //this is where to hook in plugins, to modify the possible behaviors of (Import z).
-		forceDeterminismMode makes Import always eval to infloop or not.
-	..
-	cacheByte with isForceDeterminism as high bit, and the low 7 bits are the cache.\
-	But more likely isForceDeterminism is not part of node itself but is part of NondetNode???
-	*/
-	public static byte opS = 0,
-		opT = 1,
-		opFI = 2,
-		opReflect = 3,
-		opPair = 4,
-		opSecondLastInList = 5,
-		opCurry = 6,
-		opWiki = 7;
-	
-	
-	/** TODO derive a fn which computes getComment instead of hardcoding it here */
-	public static fn getComment(fn anyVarargLambda){
-		throw new RuntimeException("cur(anyVarargLambda)==5 and the first 3 params are the 3 bits of opCurry and param 5 of 5 is a linkedlist of at least size 1, then the last thing in that linkedlist is the COMMENT (and second last thing in that linkedlist (if its size is at least 2) is funcBody, and after that in reverse order are curried params of that funcBody. Else the comment is u.");
-	}
-	
-	/** TODO derive a fn which computes setComment instead of hardcoding it here. */
-	public static fn setComment(fn any, fn comment){
-		throw new RuntimeException("TODO, counterpart of getComment, and if its not a vararg lambda already, wraps it in one which computes the same thing as it (other than reflection by L R IsLeaf which would see that its wrapped.");
-	}
+	/** if newCompiled.prev()!=compiled() then throw */
+	public void setCompiled(Compiled newCompiled);
 
 }
+

@@ -1,21 +1,20 @@
 /** Ben F Rayfield offers this software opensource MIT license */
 package wikibinator.impl;
-import static wikibinator.impl.ImportStatic.*;
-//import static wikibinator.fn.*;
-//import static wikibinator.impl.Cache.*;
+import static wikibinator.fn.*;
+import static wikibinator.impl.Cache.*;
+
 import java.util.function.Supplier;
+
 import wikibinator.Compiled;
-import wikibinator.WikiState;
+import wikibinator.Wiki;
 import wikibinator.fn;
 
 public class SimpleFn implements fn{
 	
 	public final byte op;
 	
-	public final fn func, param;
-	
-	//This kind of thing moved to RemoteFn.
-	//protected final Supplier<fn> lazyDownloadFunc, lazyDownloadParam;
+	//public final fn func, param;
+	protected final Supplier<fn> lazyDownloadFunc, lazyDownloadParam;
 	
 	protected Compiled compiled = interpretedMode;
 	
@@ -24,16 +23,20 @@ public class SimpleFn implements fn{
 		this(false);
 	}
 	
-	/** u aka the universal function, either isDirty or isForceDeterminism */
+	/** u aka the universal function, either isDirty or isForceDeterminism *
 	public SimpleFn(boolean isDirty){
 		this((byte)(isDirty?-128:0), null, null);
 	}
 	
 	public SimpleFn(fn func, fn param){
-		this(funcOpAndParamOpToParentOp(func.op(),param.op()), func, param);
+		this(fn.op(func.op(),param.op()), ()->func, ()->param);
 	}
 	
-	/*public SimpleFn(byte op, fn<T> func, fn<T> param){
+	public SimpleFn(Supplier<fn> lazyDownloadFunc, Supplier<fn> lazyDownloadParam){
+		this(fn.op(func.op(),param.op()), lazyDownloadFunc, lazyDownloadParam);
+	}
+	
+	public SimpleFn(byte op, fn<T> func, fn<T> param){
 		//this.op = op;
 		//this.func = func;
 		//this.param = param;
@@ -47,15 +50,15 @@ public class SimpleFn implements fn{
 		//this.compiled = compiled;
 	}*/
 	
-	public SimpleFn(byte op, fn func, fn param){
+	public SimpleFn(byte op, Supplier<fn> lazyDownloadFunc, Supplier<fn> lazyDownloadParam){
 		this.op = op;
-		this.func = func;
-		this.param = param;
+		this.lazyDownloadFunc = lazyDownloadFunc;
+		this.lazyDownloadParam = lazyDownloadParam;
 	}
 
-	//public fn L(){ return lazyDownloadFunc.get(); }
+	public fn L(){ return lazyDownloadFunc.get(); }
 
-	//public fn R(){ return lazyDownloadParam.get(); }
+	public fn R(){ return lazyDownloadParam.get(); }
 
 	public byte op(){ return op; }
 
@@ -69,18 +72,17 @@ public class SimpleFn implements fn{
 	
 	
 	//public fn e(fn param){
-	public static final Compiled interpretedMode = wrapInCompiled((fn func, fn param)->{
+	public static final Compiled interpretedMode = (fn func, fn param)->{
 		//FIXME add <func,param,return> to Cache just before return, if not returning from Cache already
 		
-		byte opOfCall = funcOpAndParamOpToParentOp(func.op(), param.op()); //same as new SimpleFn(this,param).op()
-		if(opIsHalted(opOfCall)) return cp(func,param);
+		byte opOfCall = fn.op(op, param.op()); //same as new SimpleFn(this,param).op()
+		if(isHalted(opOfCall)) return cp(this,param);
 		
 		//already handled the isHalted kinds, so everything here has at least 6 params
 		//or is an evaling called on a halted or a halted called on an evaling or an evaling called on an evaling
 		//in which case its low 7 bits of that byte are 0.
 		if(areLow7BitsOfOpAll0(opOfCall)){
-			throw new RuntimeException("TODO");
-			//return e().e(param.e()); //eval this and param first
+			return e().e(param.e()); //eval this and param first
 		}
 		
 		//TODO all the logic should be done in the switch(opOfCall), all 256 cases of it,
@@ -93,71 +95,56 @@ public class SimpleFn implements fn{
 		case 0b000000:
 		}*/
 	
-		fn x = func.L().R(), y = func.R(), z = param; //the 3 params of each of 8 ops
+		fn x = L().R(), y = R(), z = param; //the 3 params of each of 8 ops
 		switch(opOfCall&7){ //8 opcodes, though some of them use the next 2 bits like opcodes
 		case opS:
 			return x.e(z).e(y.e(z));
-		//break;
+		break;
 		case opT:
 			return y;
-		//break;
+		break;
 		case opFI:
 			return z;
-		//break;
+		break;
 		case opReflect:
 			if(x.isLeaf()){
 				return z.isLeaf() ? T : F;
 			}else{ //!x.isLeaf
 				return y.isLeaf() ? z.L() : z.R();
 			}
-		//break;
+		break;
 		case opPair:
 			return z.e(x).e(y);
-		//break;
+		break;	
 		case opSecondLastInList:
 			if(z.R().R().isLeaf()) return z.L();
 			//return this.e(z.R()); //this fn (in the call <this,z>) is a function that gets second last in a linkedlist
-			//return secondLastInList.e(z.R());
-			return GetFuncBody.e(z.R());
-		//break;
+			return secondLastInList.e(z.R());
+		break;
 		case opCurry:
 			//Curry x y z //(Curry counter linkedList nextParam)
 			//--ifItsEnoughCurriesToEval--> (LastInList next_linkedList next_linkedList).
-			fn nextLinkedList = Pair.e(z).e(y); //y is linkedList. z is nextParam.
+			fn nextLinkedList = pair.e(z).e(y); //y is linkedList. z is nextParam.
 			if(x.isLeaf()){ //x is counter and has counted down to 0 (such as (T (T (T u))) is 3 and u is 0. Eval.
-				if(1<2) throw new RuntimeException("FIXME should that be x.R().isLeaf(), and what if x is already leaf? this is an offby1error");
-				fn funcBody = GetFuncBody.e(nextLinkedList);
-				//FIXME??? offby1error in size of nextLinkedList including nextParam or not? offby1error somewhere else?
+				"FIXME should that be x.R().isLeaf(), and what if x is already leaf? this is an offby1error"
+				fn funcBody = secondLastInList.e(nextLinkedList);
 				return funcBody.e(nextLinkedList);
 			}else{ //has not counted down to 0 yet, so count down 1 more and add nextParam to linkedlist
 				fn counterAsOneLess = x.R();
-				//FIXME??? offby1error in size of nextLinkedList including nextParam or not? offby1error somewhere else?
-				return Curry.e(counterAsOneLess).e(nextLinkedList); //wait for next param to curry again or eval
+				return curry.e(counterAsOneLess).e(nextLinkedList); //wait for next param to curry again or eval
 			}
-		//break;
+		break;
 		case opWiki:
 			/*before calling wiki function, check isDirty(byte) and if !isDirty then eval to (S I I (S I I)). call fnThatInfiniteLoopsForAllPossibleParams=(S (T (S I I)) (T (S I I))) or something like that maybe using lazig on 2 of (S I I)... or simply call (S I I) on itself aka callParamOnItself.e(callParamOnItself)... or just inline it as S.e(I).e(I).e(S.e(I).e(I)); */
-			if(!func.isDirty()) infloop(); //return S.e(I).e(I).e(S.e(I).e(I)); //infloop so anything that halts is deterministic
-			return WikiState.wiki.apply(param); //allow nondeterminism (forkEdit wiki) as long as (L x (R x)) equals x, forall x.
-		//break;
+			if(!isDirty(this.op)) return S.e(I).e(I).e(S.e(I).e(I)); //infloop so anything that halts is deterministic
+			return Wiki.wiki.apply(param); //allow nondeterminism (forkEdit wiki) as long as (L x (R x)) equals x, forall x.
+		break;
 		default:
 			throw new RuntimeException("this can never happen but is here in case java doesnt know that");
 		}
-	});
+	};
 
-	public fn g(long binheapIndex){
-		throw new RuntimeException("TODO");
-	}
-
-	public fn G(long cbtBinheapIndex){
-		throw new RuntimeException("TODO");
-	}
-
-	public void setCompiled(Compiled newCompiled){
-		throw new RuntimeException("TODO");
-	}
-
-	/*public fn e(){
+	public fn e(){
 		if(fn.isHalted(op)) return this;
 		//(L x (R x)) equals x, forall x. If this parent node is not halted,
 		//then eval one child on the other to derive parent.
@@ -171,7 +158,7 @@ public class SimpleFn implements fn{
 		//but if using java stack to do it, its still bigO(1) but I mean the algorithm as self contained
 		//without the java stack optimization. So this is actually fast to call.
 		return cp(this,param);
-	}*/
+	}
 	
 
 }

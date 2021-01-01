@@ -28,7 +28,7 @@ else run in interpreted mode (the default Compiled) when no optimization is know
 As BinaryOperator<fn> its the same as UnaryOperator<fn> on cp(its 2 params),
 without needing to create that object. Its call x on y -> z.
 */
-public interface Compiled extends BinaryOperator<fn>, ob{
+public interface Compiled extends BinaryOperator<fn>{
 	
 	//"TODO should this as BinaryOperator already call get() and return from that BinaryOperator?"
 	
@@ -74,7 +74,7 @@ public interface Compiled extends BinaryOperator<fn>, ob{
 	(which never prevents garbcol since every fn that caches the second last thing in the linkedlist
 	can already reach that second last thing).
 	*/
-	//TODO this must either be here or implemented directly in fn??? public Blob cbt();
+	public Blob cbt();
 	
 	//TODO
 

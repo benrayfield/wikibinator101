@@ -3,12 +3,12 @@ package wikibinator;
 
 import java.util.function.UnaryOperator;
 
-public class Wiki{
-	private Wiki(){}
+public class WikiState{
+	private WikiState(){}
 	
 	/** every possible state of the wiki is a UnaryOperator<fn>.
 	It starts as a function that always returns u/theUniversalFunction for all possible params.
 	*/
-	public static UnaryOperator<fn> wiki = T.e(u);
+	public static UnaryOperator<fn> wiki = (fn param)->param; //FIXME start it as T.e(u); instead of that identityFunc
 
 }

@@ -1,5 +1,5 @@
 /** Ben F Rayfield offers this software opensource MIT license */
-package wikibinator;
+package wikibinator_old;
 
 public class Test{
 	
