@@ -9,6 +9,6 @@ public class WikiState{
 	/** every possible state of the wiki is a UnaryOperator<fn>.
 	It starts as a function that always returns u/theUniversalFunction for all possible params.
 	*/
-	public static UnaryOperator<fn> wiki = (fn param)->param; //FIXME start it as T.e(u); instead of that identityFunc
+	public static UnaryOperator<λ> wiki = (λ param)->param; //FIXME start it as T.e(u); instead of that identityFunc
 
 }

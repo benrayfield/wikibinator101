@@ -1,17 +1,17 @@
 /** Ben F Rayfield offers this software opensource MIT license */
 package wikibinator.impl;
 import static wikibinator.impl.ImportStatic.*;
-import wikibinator.fn;
+import wikibinator.λ;
 
 public class Cache{
 	private Cache(){}
 	
-	public static fn dedup(fn x){
+	public static λ dedup(λ x){
 		throw new RuntimeException("TODO");
 	}
 	
 	/** deduped call pair, without checking if this combo is valid or if it should be evaling or not. */
-	public static fn cp(fn x, fn y){
+	public static λ cp(λ x, λ y){
 		return dedup(cpcp(x,y));
 	}
 	
@@ -21,7 +21,7 @@ public class Cache{
 	/** potentially-non-deduped CALL PAIR (i wrote cp twice in the name to mean there could be multiple of them),
 	without checking if this combo is valid or if it should be evaling or not.
 	*/
-	public static fn cpcp(fn x, fn y){
+	public static λ cpcp(λ x, λ y){
 		return new SimpleFn(funcOpAndParamOpToParentOp(x.op(),y.op()), x, y);
 	}
 

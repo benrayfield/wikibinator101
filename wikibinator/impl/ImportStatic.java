@@ -94,16 +94,16 @@ public class ImportStatic{
 	
 	
 	/** TODO derive a fn which computes getComment instead of hardcoding it here */
-	public static fn getComment(fn anyVarargLambda){
+	public static λ getComment(λ anyVarargLambda){
 		throw new RuntimeException("cur(anyVarargLambda)==5 and the first 3 params are the 3 bits of opCurry and param 5 of 5 is a linkedlist of at least size 1, then the last thing in that linkedlist is the COMMENT (and second last thing in that linkedlist (if its size is at least 2) is funcBody, and after that in reverse order are curried params of that funcBody. Else the comment is u.");
 	}
 	
 	/** TODO derive a fn which computes setComment instead of hardcoding it here. */
-	public static fn setComment(fn any, fn comment){
+	public static λ setComment(λ any, λ comment){
 		throw new RuntimeException("TODO, counterpart of getComment, and if its not a vararg lambda already, wraps it in one which computes the same thing as it (other than reflection by L R IsLeaf which would see that its wrapped.");
 	}
 	
-	public static Compiled wrapInCompiled(BinaryOperator<fn> callXOnYReturnsZ){
+	public static Compiled wrapInCompiled(BinaryOperator<λ> callXOnYReturnsZ){
 		return new SimpleCompiled(callXOnYReturnsZ);
 	}
 	
@@ -126,30 +126,30 @@ public class ImportStatic{
 	and has simple opcodes designed for creating all possible vararg lambdas
 	(any integer number of params, no overflow since its by unary counting).
 	*/
-	public static final fn U = null; //FIXME not null
+	public static final λ U = null; //FIXME not null
 	
-	public static final fn S = null; //FIXME not null
+	public static final λ S = null; //FIXME not null
 	
-	public static final fn T = null; //FIXME not null
+	public static final λ T = null; //FIXME not null
 	
-	public static final fn F = null; //FIXME not null
+	public static final λ F = null; //FIXME not null
 	
-	public static final fn I = null; //FIXME not null
+	public static final λ I = null; //FIXME not null
 	
-	public static final fn Reflect = null; //FIXME not null
+	public static final λ Reflect = null; //FIXME not null
 	
-	public static final fn IsLeaf = null; //FIXME not null
+	public static final λ IsLeaf = null; //FIXME not null
 	
-	public static final fn L = null; //FIXME not null
+	public static final λ L = null; //FIXME not null
 	
-	public static final fn R = null; //FIXME not null
+	public static final λ R = null; //FIXME not null
 	
-	public static final fn Pair = null; //FIXME not null
+	public static final λ Pair = null; //FIXME not null
 	
 	/** aka SecondLastInList. gets the second last thing in a linkedlist, where funcBody goes as used by Curry */
-	public static final fn GetFuncBody = null; //FIXME not null
+	public static final λ GetFuncBody = null; //FIXME not null
 	
-	public static final fn Curry = null; //FIXME not null
+	public static final λ Curry = null; //FIXME not null
 	
 	/** a function that is entirely undefined other than what many people and computers agree
 	are its possible behaviors in terms of accumulating <func,param,return> cache entries
@@ -200,14 +200,14 @@ public class ImportStatic{
 	and game controllers and bigdata storage and minigames and pieces of interesting math functions
 	inside the wiki.
 	*/
-	public static final fn Wiki = null; //FIXME not null
+	public static final λ Wiki = null; //FIXME not null
 	
-	public static final fn SetComment = null; //FIXME not null
+	public static final λ SetComment = null; //FIXME not null
 	
-	public static final fn GetComment = null; //FIXME not null
+	public static final λ GetComment = null; //FIXME not null
 	
 	/** call the current state of the wiki on a function to get a function */
-	public static fn wiki(fn param){
+	public static λ wiki(λ param){
 		return WikiState.wiki.apply(param);
 	}
 	
@@ -221,13 +221,13 @@ public class ImportStatic{
 	which are each a lambda of 3 params (6 params of u), or some ops (Reflect) also uses params 4 and 5
 	to choose between IsLeaf, L, and R, of the last param (6 of 6).
 	*/
-	public static final fn Typeval = null; //FIXME not null
+	public static final λ Typeval = null; //FIXME not null
 	
-	public static fn cp(fn func, fn param){
+	public static λ cp(λ func, λ param){
 		return Cache.cp(func, param);
 	}
 	
-	public static fn cpcp(fn func, fn param){
+	public static λ cpcp(λ func, λ param){
 		return Cache.cpcp(func, param);
 	}
 

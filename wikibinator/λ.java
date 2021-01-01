@@ -4,7 +4,7 @@ import java.util.function.UnaryOperator;
 import wikibinator.Compiled;
 //TODO import immutable.lazycl.Blob;
 
-public strictfp interface fn extends UnaryOperator<fn>, /*Blob,*/ ob{
+public strictfp interface λ extends UnaryOperator<λ>, /*Blob,*/ ob{
 	
 	/*TODO use binheap indexing to do what Blob does for a linear range, instead of implementing Blob?
 	Im thinking of storing the first n bits in each cbt in all higher binary forest nodes,
@@ -38,7 +38,7 @@ public strictfp interface fn extends UnaryOperator<fn>, /*Blob,*/ ob{
 	public fn L();
 	public fn R();
 	*/
-	public fn g(long binheapIndex);
+	public λ g(long binheapIndex);
 			
 	/** same as g(binheapIndexFirst).g(binheapIndexSecond) but does not necessarily create
 	the fn returned by g(binheapIndexFirst) as the middle step.
@@ -46,7 +46,7 @@ public strictfp interface fn extends UnaryOperator<fn>, /*Blob,*/ ob{
 	and you want to get from a pair to a pair, but this is more flexible, and slower.
 	If you want complete control of the path through L() and R() in something of exabit size, use this.
 	*/
-	public default fn gg(long binheapIndexFirst, long binheapIndexSecond){
+	public default λ gg(long binheapIndexFirst, long binheapIndexSecond){
 		return g(binheapIndexFirst).g(binheapIndexSecond);
 	}
 	
@@ -54,32 +54,32 @@ public strictfp interface fn extends UnaryOperator<fn>, /*Blob,*/ ob{
 	so this can index individual bits in an exabit size bitstring, though that doesnt mean it can be efficiently stored.
 	Remember, a cbt/Blob is made of (pair x y) aka ((pair x) y) so is twice as deep as you might expect unless you use this.
 	*/
-	public fn G(long cbtBinheapIndex);
+	public λ G(long cbtBinheapIndex);
 	
-	public default fn L(){
+	public default λ L(){
 		return g(2L);
 	}
 	
-	public default fn R(){
+	public default λ R(){
 		return g(3L);
 	}
 	
 	/** same as L().R(). This is an optimization for getting x out of ((pair x) y) aka (pair x y)
 	without (pair x) having to exist.
 	*/
-	public default fn LR(){
+	public default λ LR(){
 		return G(2L);
 		//return g(0b110L); is that right? reverse the high/low bit order (excluding the highest 1 bit) or not?
 	}
 	
 	
 	
-	public default fn e(fn param){
+	public default λ e(λ param){
 		//TODO make sure Compiled does the get() automatically if !compiled().on(): return compiled().get().apply(this,param);
 		return compiled().apply(this,param);
 	}
 	
-	public default fn apply(fn param){
+	public default λ apply(λ param){
 		return e(param);
 	}
 	

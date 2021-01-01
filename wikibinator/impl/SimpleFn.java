@@ -6,13 +6,13 @@ import static wikibinator.impl.ImportStatic.*;
 import java.util.function.Supplier;
 import wikibinator.Compiled;
 import wikibinator.WikiState;
-import wikibinator.fn;
+import wikibinator.λ;
 
-public class SimpleFn implements fn{
+public class SimpleFn implements λ{
 	
 	public final byte op;
 	
-	public final fn func, param;
+	public final λ func, param;
 	
 	//This kind of thing moved to RemoteFn.
 	//protected final Supplier<fn> lazyDownloadFunc, lazyDownloadParam;
@@ -29,7 +29,7 @@ public class SimpleFn implements fn{
 		this((byte)(isDirty?-128:0), null, null);
 	}
 	
-	public SimpleFn(fn func, fn param){
+	public SimpleFn(λ func, λ param){
 		this(funcOpAndParamOpToParentOp(func.op(),param.op()), func, param);
 	}
 	
@@ -47,7 +47,7 @@ public class SimpleFn implements fn{
 		//this.compiled = compiled;
 	}*/
 	
-	public SimpleFn(byte op, fn func, fn param){
+	public SimpleFn(byte op, λ func, λ param){
 		this.op = op;
 		this.func = func;
 		this.param = param;
@@ -63,13 +63,13 @@ public class SimpleFn implements fn{
 	
 	//FIXME need dedup map. its in Cache.java (TODO)
 	
-	public fn e(fn param){
+	public λ e(λ param){
 		return compiled.get().apply(this, param);
 	}
 	
 	
 	//public fn e(fn param){
-	public static final Compiled interpretedMode = wrapInCompiled((fn func, fn param)->{
+	public static final Compiled interpretedMode = wrapInCompiled((λ func, λ param)->{
 		//FIXME add <func,param,return> to Cache just before return, if not returning from Cache already
 		
 		byte opOfCall = funcOpAndParamOpToParentOp(func.op(), param.op()); //same as new SimpleFn(this,param).op()
@@ -93,7 +93,7 @@ public class SimpleFn implements fn{
 		case 0b000000:
 		}*/
 	
-		fn x = func.L().R(), y = func.R(), z = param; //the 3 params of each of 8 ops
+		λ x = func.L().R(), y = func.R(), z = param; //the 3 params of each of 8 ops
 		switch(opOfCall&7){ //8 opcodes, though some of them use the next 2 bits like opcodes
 		case opS:
 			return x.e(z).e(y.e(z));
@@ -123,14 +123,14 @@ public class SimpleFn implements fn{
 		case opCurry:
 			//Curry x y z //(Curry counter linkedList nextParam)
 			//--ifItsEnoughCurriesToEval--> (LastInList next_linkedList next_linkedList).
-			fn nextLinkedList = Pair.e(z).e(y); //y is linkedList. z is nextParam.
+			λ nextLinkedList = Pair.e(z).e(y); //y is linkedList. z is nextParam.
 			if(x.isLeaf()){ //x is counter and has counted down to 0 (such as (T (T (T u))) is 3 and u is 0. Eval.
 				if(1<2) throw new RuntimeException("FIXME should that be x.R().isLeaf(), and what if x is already leaf? this is an offby1error");
-				fn funcBody = GetFuncBody.e(nextLinkedList);
+				λ funcBody = GetFuncBody.e(nextLinkedList);
 				//FIXME??? offby1error in size of nextLinkedList including nextParam or not? offby1error somewhere else?
 				return funcBody.e(nextLinkedList);
 			}else{ //has not counted down to 0 yet, so count down 1 more and add nextParam to linkedlist
-				fn counterAsOneLess = x.R();
+				λ counterAsOneLess = x.R();
 				//FIXME??? offby1error in size of nextLinkedList including nextParam or not? offby1error somewhere else?
 				return Curry.e(counterAsOneLess).e(nextLinkedList); //wait for next param to curry again or eval
 			}
@@ -145,11 +145,11 @@ public class SimpleFn implements fn{
 		}
 	});
 
-	public fn g(long binheapIndex){
+	public λ g(long binheapIndex){
 		throw new RuntimeException("TODO");
 	}
 
-	public fn G(long cbtBinheapIndex){
+	public λ G(long cbtBinheapIndex){
 		throw new RuntimeException("TODO");
 	}
 

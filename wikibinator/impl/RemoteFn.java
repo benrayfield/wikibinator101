@@ -2,9 +2,9 @@
 package wikibinator.impl;
 import java.util.function.Supplier;
 import wikibinator.Compiled;
-import wikibinator.fn;
+import wikibinator.λ;
 
-public class RemoteFn implements fn{
+public class RemoteFn implements λ{
 	
 	/** TODO this should be 1 of the bytes in id instead of a constructor param */
 	public final byte op;
@@ -17,22 +17,22 @@ public class RemoteFn implements fn{
 	it will find that in the cache and not call downloader.get(),
 	but if you call things on this which are not cached then it will downloader.get().
 	*/
-	public final fn idType;
+	public final λ idType;
 	
 	/** compare by this */
-	public final fn id;
+	public final λ id;
 	
-	protected final Supplier<fn> downloader;
+	protected final Supplier<λ> downloader;
 	
 	/** FIXME byte op should be 1 of the bytes in id as a compiled().cbt()->Blob instead of a constructor param */
-	public RemoteFn(byte op, fn idType, fn id, Supplier<fn> downloader){
+	public RemoteFn(byte op, λ idType, λ id, Supplier<λ> downloader){
 		this.op = op; //FIXME this should be 1 of the bytes in id instead of a constructor param
 		this.idType = idType;
 		this.id = id;
 		this.downloader = downloader;
 	}
 
-	public fn e(fn param){
+	public λ e(λ param){
 		return downloader.get().e(param);
 	}
 
@@ -64,11 +64,11 @@ public class RemoteFn implements fn{
 		downloader.get().setCompiled(compiled);
 	}
 
-	public fn g(long binheapIndex){
+	public λ g(long binheapIndex){
 		throw new RuntimeException("TODO");
 	}
 
-	public fn G(long cbtBinheapIndex){
+	public λ G(long cbtBinheapIndex){
 		throw new RuntimeException("TODO");
 	}
 

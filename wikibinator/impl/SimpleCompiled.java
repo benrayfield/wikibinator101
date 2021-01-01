@@ -3,7 +3,7 @@ package wikibinator.impl;
 import java.util.function.BinaryOperator;
 
 import wikibinator.Compiled;
-import wikibinator.fn;
+import wikibinator.λ;
 
 public class SimpleCompiled implements Compiled{
 	
@@ -11,14 +11,14 @@ public class SimpleCompiled implements Compiled{
 	
 	public Compiled prevOrNull;
 	
-	public final BinaryOperator<fn> wrapMe;
+	public final BinaryOperator<λ> wrapMe;
 	
-	public SimpleCompiled(BinaryOperator<fn> wrapMe){
+	public SimpleCompiled(BinaryOperator<λ> wrapMe){
 		this.wrapMe = wrapMe;
 	}
 
 	/** todo optimize by extending SimpleCompiled directly and overriding this apply func, consistent with setOn and prev etc? */
-	public fn apply(fn func, fn param){
+	public λ apply(λ func, λ param){
 		return (on?wrapMe:prevOrNull).apply(func, param);
 	}
 

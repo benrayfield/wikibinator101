@@ -28,7 +28,7 @@ else run in interpreted mode (the default Compiled) when no optimization is know
 As BinaryOperator<fn> its the same as UnaryOperator<fn> on cp(its 2 params),
 without needing to create that object. Its call x on y -> z.
 */
-public interface Compiled extends BinaryOperator<fn>, ob{
+public interface Compiled extends BinaryOperator<λ>, ob{
 	
 	//"TODO should this as BinaryOperator already call get() and return from that BinaryOperator?"
 	
