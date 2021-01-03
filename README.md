@@ -12,6 +12,14 @@ A decentralized wiki style interactive math book (for ages 0 to expert, which TO
 //with no unknowns, but we only use trinary (true, false, or unknown) values of 3d tensor (instead of 4d) as optimization,
 //and in practice will appear and be used any way people like even if you're bad at math.  
 //
+//The main data structure for this system might (each instance) contain... sparse 4d tensor of 2 bits per cell,
+//meaning that <wikiState,func,param,return> is true (10), false (01), unknown (00), or disproofByContradiction (11),
+//AND a sparse 2d triangle (undirected graph) of 2 bits per cell, that it is true/false/unknown/disproof that these 2 dimensions equal.
+//2 Dimensions equal if all possible <wikiState,func,param,return> on them equal aka can be split or merged without contradiction.
+//This data structure might also optionally be named by a hash and have a proofOfWork attached to it only to attract attention
+//to it among many other possible randomly generated useless combos of bits, but a high proofOfWork does not allow proving a falsity,
+//only may attract attention to reach 100% agreement among all people and computers involved faster.
+//
 //As the name suggests, wikibinator will start as a math wiki similar to wikipedia, to explain how itself works,
 //and to derive all known kinds of math in the form of lambda functions, such as pi could be represented
 //as a function that takes an integer of which digit number you want and in finite time returns that digit,
