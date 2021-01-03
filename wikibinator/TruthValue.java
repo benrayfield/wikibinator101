@@ -39,7 +39,7 @@ public enum TruthValue{
 
 	public TruthValue join(TruthValue x){
 		switch(x){
-		case yes: case no: return this==x ? this : bull;
+		case yes: case no: return (this==unknown || this==x) ? x : bull;
 		case unknown: return this;
 		case bull: return bull;
 		default: throw new RuntimeException("This cant happen. Why is eclipse making me put this here?");
