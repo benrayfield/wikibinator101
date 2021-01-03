@@ -87,7 +87,7 @@ A decentralized wiki style interactive math book (for ages 0 to expert, which TO
 //of possible incoming lightcone vibrations are branch predicted and use whichever of them are not excluded by known constraints locally.
 //In terms of games and realtime simulations, that means lag can be reduced, not hidden like common practices of decaying movement
 //until the next data comes in... but actually reduced, by predicting all possible next states and excluding those which cant be true together.
-
+//It may someday be a good branch prediction optimization for some kind of optical computer.
 
 wikibinator = λ;
 u = λ; //easier to write u than λ
