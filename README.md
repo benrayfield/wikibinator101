@@ -25,7 +25,7 @@ A decentralized wiki style interactive math book (for ages 0 to expert, which TO
 //Syntax:
 //λ is wikibinator.
 //(x y) means call x on y, and its value is whatever that call returns.If a call has less than 6 params
-//it is halted so returns itself, like (λ λ) is  waiting on 5 more params, and ((λ (λ λ)) λ) is waiting on 3 more params.
+//it is halted so returns itself, like (λ λ) is  waiting on 5 more params, and ((λ (λ λ)) λ) aka (λ (λ λ) λ) is waiting on 4 more params.
 //(w x y z) means (((w x) y) z), which is called a curryList, similar to a linkedList but in reverse order and doesnt have nil.
 //[a b c] is a linkedlist that means (pair a (pair b (pair c λ))). λ is used as nil in linkedLists.
 //{a b} means (pair a b).
