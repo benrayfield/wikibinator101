@@ -1,0 +1,65 @@
+//TODO see readme.md for explanation of this syntax in the "//"... lines
+//such as "[a b c] is a linkedlist that means (pair a (pair b (pair c λ))). λ is used as nil in linkedLists.".
+
+
+wikibinator = λ;
+u = λ; //easier to write u than λ
+uu = (u u);
+op0 = (u u u u);
+op1 = (u u u uu);
+op2 = (u u uu u);
+op3 = (u u uu uu);
+op4 = (u uu u u);
+op5 = (u uu u uu);
+op6 = (u uu uu u);
+op7 = (u uu uu uu);
+
+//public static final byte
+//	opWiki = 0,
+//	opS = 1,
+//	opT = 2,
+//	opFI = 3,
+//	opPair = 4,
+//	opSecondLastInList = 5,
+//	opCurry = 6,
+//	opReflect = 7;
+
+w = (op0 u u); //The wiki. The only nondeterministic function, defined by agreement among many on an ever expanding set of <? func param return>.
+//wiki = (u u u u u u) cuz op0 = (u u u u).
+//(wiki x) is (u u u u u u x), forall x.
+//For example, (λ λ λ λ λ λ (λ λ λ λ λ λ)) aka (w w) is calling the wiki on itself. TODO what should that return?
+s = op1;
+t = (op2 u);
+f = (op3 u);
+p = op4;
+b = (op5 u u);
+c = op6;
+reflect_todoChooseALetterForThis = op7;
+
+wiki = w;
+i = (f u); //identityFunc
+pair = p;
+getFuncBodyAkaSecondLastInLinkedList = b;
+curry = C;
+a = (reflect_todoChooseALetterForThis u u);
+l = (reflect_todoChooseALetterForThis uu u);
+r = (reflect_todoChooseALetterForThis uu uu);
+isLeaf = a;
+getFunc = l;
+getParam = r;
+
+<? u u uu>;
+<? (s i i) wiki wiki>;
+<? (s i i) u u>;
+<? (l wiki) (r wiki) wiki>; //(l x (r x)) equals x forall x.
+<? (l u) (r u) u>; //(l x (r x)) equals x forall x.
+<? l u i>; //(l x (r x)) equals x forall x.
+<? r u u>; //(l x (r x)) equals x forall x.
+<? (l l) (r l) l>; //(l x (r x)) equals x forall x.
+<? (l r) (r r) r>; //(l x (r x)) equals x forall x.
+<? (l p) (r p) p>; //(l x (r x)) equals x forall x.
+
+
+//TODO define equals function. will be similar to the lambda returned by OcfnUtil.equals() in occamsfuncer.
+
+

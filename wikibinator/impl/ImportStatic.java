@@ -83,14 +83,18 @@ public class ImportStatic{
 	cacheByte with isForceDeterminism as high bit, and the low 7 bits are the cache.\
 	But more likely isForceDeterminism is not part of node itself but is part of NondetNode???
 	*/
-	public static final byte opS = 0,
-		opT = 1,
-		opFI = 2,
-		opReflect = 3,
-		opPair = 4,
-		opSecondLastInList = 5,
-		opCurry = 6,
-		opWiki = 7;
+	public static final byte
+		opWiki = 0, //1
+		opS = 1, //3
+		opT = 2, //2
+		opFI = 3, //2
+		opPair = 4, //3
+		opSecondLastInList = 5, //1
+		opCurry = 6, //3
+		opReflect = 7; //L 1, R 1, IsLeaf 1.
+			//Have 1 more space coult put a 1 param func,
+			//but 6 params is simpler than 5 cuz would squash them together too tightly.
+			//Keep it as 6 params. Its maybe the best possible digital universal function, either that or is very close to it.
 	
 	
 	/** TODO derive a fn which computes getComment instead of hardcoding it here */
