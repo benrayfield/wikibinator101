@@ -18,7 +18,8 @@ A decentralized wiki style interactive math book (for ages 0 to expert, which TO
 //2 Dimensions equal if all possible <wikiState,func,param,return> on them equal aka can be split or merged without contradiction.
 //This data structure might also optionally be named by a hash and have a proofOfWork attached to it only to attract attention
 //to it among many other possible randomly generated useless combos of bits, but a high proofOfWork does not allow proving a falsity,
-//only may attract attention to reach 100% agreement among all people and computers involved faster.
+//only may attract attention to reach 100% agreement among all people and computers involved faster,
+//agreement only on the facts of math which can be proven, not on one opinion above another.
 //
 //As the name suggests, wikibinator will start as a math wiki similar to wikipedia, to explain how itself works,
 //and to derive all known kinds of math in the form of lambda functions, such as pi could be represented
