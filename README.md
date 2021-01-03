@@ -4,7 +4,7 @@ A decentralized wiki style interactive math book (for ages 0 to expert, which TO
 ```
 //My theory-of-everything:
 //Universe is a specific irrational fraction = the 4d cantor diagonal of <wikiState,func,param,return> -> true or false,
-//where numberOfUniqueBinaryForestsAtHeight aka uniqbin(0)=1 and uniqbin(x)=uniqbin(x^2)+1
+//where numberOfUniqueBinaryForestsAtHeight aka uniqbin(0)=1 and uniqbin(x)=uniqbin(x-1)^2+1
 //(todo found that by brute forcing a few levels deep, copy that code here)
 //with no unknowns, but we only use trinary (true, false, or unknown) values of 3d tensor (instead of 4d) as optimization,
 //and in practice will appear and be used any way people like even if you're bad at math.  
