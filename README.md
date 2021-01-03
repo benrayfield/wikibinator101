@@ -73,6 +73,21 @@ A decentralized wiki style interactive math book (for ages 0 to expert, which TO
 //Also it might someday be able to run on a black-hole-computer or gray-goo, but CPUs and GPUs are the sooner goal.
 
 
+//Its important to understand that, if each var name is written only once (which can just append a number to the var name
+//after each time you write it automatically) that...
+//If there are n lines of code then all n! permutations of those lines of code, reordering them before and after eachother,
+//are still true statements, and in practice as long as you dont call wiki that will be equally efficient to compute it that way,
+//and if you do call wiki in that then its still the same code but may be impractically slow to compute it
+//or have sync problems involving the limiting of compute resources recursively which will be mounted
+//into the wiki function like a bloom-filter growing (which may also be uncached / garbcoled)...
+//But the point is, these lines of code are a sparse 4d tensor, with each "var name" being a dimension,
+//and tensors are not affected by permutation, and those tensors represent all possible pasts, present, and futures of the system,
+//therefore the whole system, in parts which do not call wiki, can in theory be computed in an infinite number of threads
+//which can branch predict eachother and operate faster than light to the extent that all exponentially increasing number
+//of possible incoming lightcone vibrations are branch predicted and use whichever of them are not excluded by known constraints locally.
+//In terms of games and realtime simulations, that means lag can be reduced, not hidden like common practices of decaying movement
+//until the next data comes in... but actually reduced, by predicting all possible next states and excluding those which cant be true together.
+
 
 wikibinator = λ;
 u = λ; //easier to write u than λ
