@@ -154,8 +154,8 @@ getFunc = l;
 getParam = r;
 
 <u u uu>;
-<(s i i) wiki wiki>;
-<(s i i) u u>;
+<(s i i) wiki (wiki wiki)>;
+<(s i i) u (u u)>;
 <(l wiki) (r wiki) wiki>; //(l x (r x)) equals x forall x.
 <(l u) (r u) u>; //(l x (r x)) equals x forall x.
 <l u i>; //(l x (r x)) equals x forall x.
