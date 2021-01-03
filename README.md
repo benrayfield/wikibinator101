@@ -20,6 +20,14 @@ A decentralized wiki style interactive math book (for ages 0 to expert, which TO
 //to it among many other possible randomly generated useless combos of bits, but a high proofOfWork does not allow proving a falsity,
 //only may attract attention to reach 100% agreement among all people and computers involved faster,
 //agreement only on the facts of math which can be proven, not on one opinion above another.
+//These data structures could be merged like joins in a database, so for example you take 2 of them,
+//which has as many dimensions as the sum of each of their dimensions, then in a proof based or statistics based way
+//start accumulating edges in that bloom-filter in the 2d tensor part, edges which claim that some pair of nodes equals or does not equal,
+//and 4d tensor edges <wikiState,func,param,return>, so that whether they are in 2 equal wikiStates or nonequal wikiStates (which may be vague
+//if which wikiStates each is in does not have alot of <func,param,return> statements to know precisely what it is and is not...
+//2 such data structures, which are basically a 2d with a 4d bloom filter, kind of evolve together (by n-sat-like logic andOr statistics andOr other optimizations)
+//to create more bloom-filters which are all or at least most of them true, for the purpose of sharing <wikiState,func,param,return> caches
+//at gaming-low-lag for number crunching, math wikis, musical instruments, serious tools, fun things, etc... across the internet.
 //
 //As the name suggests, wikibinator will start as a math wiki similar to wikipedia, to explain how itself works,
 //and to derive all known kinds of math in the form of lambda functions, such as pi could be represented
