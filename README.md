@@ -7,6 +7,10 @@ A decentralized wiki style interactive math book (for ages 0 to expert, which TO
 //as a function that takes an integer of which digit number you want and in finite time returns that digit,
 //and pi squared could be represented as another such function which calls pi, but thats not a very efficient way.
 //
+//Similar to the spend and wallet and solve calls in (some forks of occamsfuncer, TODO), those calls will be somewhere in the wiki
+//that can be called on otherwise deterministic lambdas to limit their amounts of compute resources (time, memory, etc) recursively,
+//so in practice all lambda calls will halt within .02 seconds in time to display the next video frame of a game or sound etc.
+//
 //I'm exploring possible syntaxes, for the well defined wikibinator universal function.
 //λ means that universal function aka wikibinator. All possible deterministic functions are made of combos of λ.
 //A certain combo of λ (TODO choose order of params so can write it here) means the wiki, which is a function,
