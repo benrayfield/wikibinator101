@@ -6,6 +6,7 @@ A decentralized wiki style interactive math book (for ages 0 to expert, which TO
 //Universe is a specific irrational fraction = the 4d cantor diagonal of <wikiState,func,param,return> -> true or false,
 //and to avoid ambiguity of those words I mean 4d cantor diagonal as a nondecreasing order of manhattan-distance from
 //<λ,λ,λ,λ> which is the first digit, and any way of breaking ties will work such as bigEndian of 4 integers or littleEndian of 4,
+//such as <λ,λ,λ,(λ λ)> is the second digit,
 //where numberOfUniqueBinaryForestsAtHeight aka uniqbin(0)=1 and uniqbin(x)=uniqbin(x-1)^2+1
 //(todo found that by brute forcing a few levels deep, copy that code here)
 //with no unknowns, but we only use trinary (true, false, or unknown) values of 3d tensor (instead of 4d) as optimization,
