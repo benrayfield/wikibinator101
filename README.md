@@ -2,6 +2,13 @@
 A decentralized wiki style interactive math book (for ages 0 to expert, which TODO will appear like cartoony art with drag and drop or hardcore number crunching tools that hook into cloud computing tools etc depending on the user's skill), based on a combinator (that is both a universal lambda function and a pattern calculus function of 6 parameters which has vararg lambdas) in which it is extremely easier to say true things than to say false things, based on a logic similar to godel-number where one must commit to statements about lambda called on lambda returns lambda before one can verify which lambdas they are, and in theory scaleable enough for graphics, musical instruments, GPU number crunching, etc, but lets start simple, so everyone can understand and fit the pieces of the puzzle together.
 
 ```
+//My theory-of-everything:
+//Universe is a specific irrational fraction = the 4d cantor diagonal of <wikiState,func,param,return> -> true or false,
+//where numberOfUniqueBinaryForestsAtHeight aka uniqbin(0)=1 and uniqbin(x)=uniqbin(x^2)+1
+//(todo found that by brute forcing a few levels deep, copy that code here)
+//with no unknowns, but we only use trinary (true, false, or unknown) values of 3d tensor (instead of 4d) as optimization,
+//and in practice will appear and be used any way people like even if you're bad at math.  
+//
 //As the name suggests, wikibinator will start as a math wiki similar to wikipedia, to explain how itself works,
 //and to derive all known kinds of math in the form of lambda functions, such as pi could be represented
 //as a function that takes an integer of which digit number you want and in finite time returns that digit,
