@@ -58,5 +58,15 @@ public interface Verse{
 	have a clique of TruthValue.yes on eq(dimensionA,dimensionB) which is still unitary.
 	*/
 	public Verse randomPermutateDims(Random rand);
+	
+	TODO
+	/** This is needed by SimpleVM to compute procedurally forward efficiently,
+	in the way that (wikiState,func,param) is like a database.table primaryKey and ret is its value,
+	and for every primaryKey there is exactly 1 value (though we may not know what it is) in the abstract math.
+	<br><br>
+	Select from wfpr(wikiState,func,param,*) which -> TruthValue.yes (no unknown, no, or bull),
+	and FIXME if there are none of those, then.. should this infloop or return null or what?
+	*/
+	public Number wfpObserve(Number wikiState, Number func, Number param, Random rand);
 
 }
