@@ -14,7 +14,8 @@ A decentralized wiki style interactive math book (for ages 0 to expert, which TO
 //
 //The main data structure for this system might (each instance) contain... sparse 4d tensor of 2 bits per cell,
 //meaning that <wikiState,func,param,return> is true (10), false (01), unknown (00), or disproofByContradiction (11),
-//AND a sparse 2d triangle (undirected graph) of 2 bits per cell, that it is true/false/unknown/disproof that these 2 dimensions equal.
+//AND a sparse 2d triangle (undirected graph) of 2 bits per cell, that it is true/false/unknown/disproof that these 2 dimensions equal,
+//AND some kind of edges which claim that a certain node/dimension is or is not equal to (see cbt) a certain powOf2 size binary blob.
 //2 Dimensions equal if all possible <wikiState,func,param,return> on them equal aka can be split or merged without contradiction.
 //This data structure might also optionally be named by a hash and have a proofOfWork attached to it only to attract attention
 //to it among many other possible randomly generated useless combos of bits, but a high proofOfWork does not allow proving a falsity,
