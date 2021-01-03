@@ -1,6 +1,125 @@
 # wikibinator
 A decentralized wiki style interactive math book (for ages 0 to expert, which TODO will appear like cartoony art with drag and drop or hardcore number crunching tools that hook into cloud computing tools etc depending on the user's skill), based on a combinator (that is both a universal lambda function and a pattern calculus function of 6 parameters which has vararg lambdas) in which it is extremely easier to say true things than to say false things, based on a logic similar to godel-number where one must commit to statements about lambda called on lambda returns lambda before one can verify which lambdas they are, and in theory scaleable enough for graphics, musical instruments, GPU number crunching, etc, but lets start simple, so everyone can understand and fit the pieces of the puzzle together.
 
+```
+//As the name suggests, wikibinator will start as a math wiki similar to wikipedia, to explain how itself works,
+//and to derive all known kinds of math in the form of lambda functions, such as pi could be represented
+//as a function that takes an integer of which digit number you want and in finite time returns that digit,
+//and pi squared could be represented as another such function which calls pi, but thats not a very efficient way.
+//
+//I'm exploring possible syntaxes, for the well defined wikibinator universal function.
+//λ means that universal function aka wikibinator. All possible deterministic functions are made of combos of λ.
+//A certain combo of λ (TODO choose order of params so can write it here) means the wiki, which is a function,
+//but we only learn which function it is by how people and computers use it,
+//which there is math ((L x (R x)) equals x forall x and the logic in SimpleVM.interpretedMode) to verify
+//the wiki function is consistent based on many <func,param,return> cache entries.
+//Every function is an infinite set of <func,param,return> cache entries,
+//exactly 1 return value for each possible func called on possible param,
+//and as a semantic if it does not halt then we say it halts on (S I I (S I I)) which is an infinite loop,
+//but of course halting oracles are impossible (since they answer in finite time), but still it is a fact of math
+//that any specific lambda call either halts or does not halt.
+//It just takes an infinite number of compute cycles and memory to know,
+//so that semantic is mostly there as a math abstraction, but also may be used in disproof-by-contradiction sometimes,
+//in proofs using the ((L x (R x)) equals x forall x and the logic in SimpleVM.interpretedMode) constraint.
+//
+//Syntax:
+//λ is wikibinator.
+//(x y) means call x on y, and its value is whatever that call returns.If a call has less than 6 params
+//it is halted so returns itself, like (λ λ) is  waiting on 5 more params, and ((λ (λ λ)) λ) is waiting on 3 more params.
+//(w x y z) means (((w x) y) z), which is called a curryList, similar to a linkedList but in reverse order and doesnt have nil.
+//[a b c] is a linkedlist that means (pair a (pair b (pair c λ))). λ is used as nil in linkedLists.
+//{a b} means (pair a b).
+//<func param ret> means (func param) returns ret. It always has 3 things.
+//TODO: "hello" means the utf8 bitstring of 5*8 bits, stored in a complete binary tree (cbt) of pairs of pairs... of T or F,
+//padded with T then F F F... until the next powOf2 size. Or TODO I might use typeval to mark it as being a string, some few constants
+//representing a few common types but there is no type system other than <type x λ> vs <type x anythingExceptλ>,
+//so for example if <type x (S I I (S I I))> then x is not that type cuz the call (type x) will not halt
+//(even though we may be unable to know that in finite time, so be careful to design types so they always halt).
+//There are no variables cuz everything is a constant, but in this file I might define some variables outside of wikibinator
+//whose value can be changed to a different constant, but those constants cant refer to those variables, only to constants.
+//Even the wiki function is a constant and just accumultes <func param return> facts in an infinite sparse dimensional space
+//of all possibilities.
+//
+//I'm thinking about representing the names (like infloop in <(S I I),(S I I),infloop>) as the return value of (wiki ["infloop" "myNamespaceXYZ"]),
+//so that would be the statement <(S I I) (S I I) (wiki ["infloop" "myNamespaceXYZ"])>,
+//but there might be a problem writing it that way since (wiki ["infloop" "myNamespaceXYZ"]) returns (S I I (S I I)),
+//and maybe what I meant to say is <wiki ["infloop" "myNamespaceXYZ"] (S I I (S I I))>?
+//Or maybe I'll just write it as: infloop = (S I I (S I I));
+//FIXME.
+//
+//If a var name is written more than once, then its just a semantic for appending a number to the var name
+//so its a different var name each time, and lines of code above that use the lower numbers
+//and lines after that use the higher numbers, so each "var name" has at most 1 constant value
+//in any certain multiline string of lines of code, and those lines represent a sparse 3d tensor
+//of 3 possible values at each cell: true, false, or unknown: that <func param return> is true false or unknown.
+//Since wikibinator is meant for ever expanding virtual worlds, tools, games, number crunching, etc...
+//those sparse tensors fitting together with other sparse tensors could be said
+//to be similar to a variant of "the matrix" as a virtual world can fit in a 3d tensor and a matrix is a 2d tensor.
+//All possible states of the wikibinator system are sparse 3d tensors of 3 possible values per cell - true false unknown.
+//Also it might someday be able to run on a black-hole-computer or gray-goo, but CPUs and GPUs are the sooner goal.
+
+
+
+wikibinator = λ;
+u = λ; //easier to write u than λ
+uu = (u u);
+op0 = (u u u u);
+op1 = (u u u uu);
+op2 = (u u uu u);
+op3 = (u u uu uu);
+op4 = (u uu u u);
+op5 = (u uu u uu);
+op6 = (u uu uu u);
+op7 = (u uu uu uu);
+
+//public static final byte
+//	opWiki = 0,
+//	opS = 1,
+//	opT = 2,
+//	opFI = 3,
+//	opPair = 4,
+//	opSecondLastInList = 5,
+//	opCurry = 6,
+//	opReflect = 7;
+
+w = (op0 u u); //The wiki. The only nondeterministic function, defined by agreement among many on an ever expanding set of <func param return>.
+//wiki = (u u u u u u) cuz op0 = (u u u u).
+//(wiki x) is (u u u u u u x), forall x.
+//For example, (λ λ λ λ λ λ (λ λ λ λ λ λ)) aka (w w) is calling the wiki on itself. TODO what should that return?
+s = op1;
+t = (op2 u);
+f = (op3 u);
+p = op4;
+b = (op5 u u);
+c = op6;
+reflect_todoChooseALetterForThis = op7;
+
+wiki = w;
+i = (f u); //identityFunc
+pair = p;
+getFuncBodyAkaSecondLastInLinkedList = b;
+curry = C;
+a = (reflect_todoChooseALetterForThis u u);
+l = (reflect_todoChooseALetterForThis uu u);
+r = (reflect_todoChooseALetterForThis uu uu);
+isLeaf = a;
+getFunc = l;
+getParam = r;
+
+<u u uu>;
+<(s i i) wiki wiki>;
+<(s i i) u u>;
+<(l wiki) (r wiki) wiki>; //(l x (r x)) equals x forall x.
+<(l u) (r u) u>; //(l x (r x)) equals x forall x.
+<l u i>; //(l x (r x)) equals x forall x.
+<r u u>; //(l x (r x)) equals x forall x.
+<(l l) (r l) l>; //(l x (r x)) equals x forall x.
+<(l r) (r r) r>; //(l x (r x)) equals x forall x.
+<(l p) (r p) p>; //(l x (r x)) equals x forall x.
+
+//TODO define equals function. will be similar to the lambda returned by OcfnUtil.equals() in occamsfuncer.
+```
+
 Unlike other advanced systems, its very important for wikibinator to be able to explain its every detail of its own operation.
 
 The main thing wikibinator does is to help many people and computers agree among eachother what the "Import" combinator/function does, which is entirely undefined other than the <function,parameter,return> style messages they say to eachother, which can be verified or disproven statistically based on the quinelike behavior of any function x that (L x (R x)) equals x, for all possible x, which means that recursively anything can be turing-complete-challenge-responsed. To extremely reduce the spread of unverified rumors, <func,param,return> cache entries, which are 3 of 256 bit merkle ids (in binary forest of merkle ids, of any chosen hash function such as SHA3_256 with some pre and post processing)... The <func,param> is, in terms of database theory, a primary-key, and the "return" is its only value that it can ever have. Its constant, not changing over time or context. The same function and parameter always gives the same return value, but depending on [what the "Import" combinator/function does, which is entirely undefined other than the <function,parameter,return> style messages they say to eachother], <function,parameter> --> return, will vary but hopefully converge to some consistent view of it all in the whole wiki, which is basically a way to verify and experiment with claimed behaviors of this single function which is defined only by peoples and computers shared beliefs about it, however those may fit together. For example, this function may be learned and converged similar to a neuralnet energy function, to when it receives certain patterns of input (other functions) that it does GPU matrix multiply, a certain musical instrument, SQL queries with extremely faster hyperdimensional mutex convergence at low lag, or anything people and computers together may find useful to define it as, as long as (L x (R x)) recursively in all possible combos of calling the wikibinator (a combinator) on itself in many combos (why its called a combinator, like SKI calculus and pattern calculus)... as long as this (L x (R x)) constraint is true in all possible sparsely observed combos, which is in theory harder to fake longterm than searching for a needle in a haystack of infinite size, because, and here's the very very slightly homomorphic piece of it which protects its security... <func,param> is secureHashed and its return value is not, so those who tend to spread rumors that <func,param> --> someReturn, will not necessarily know what func or param are, just will know the secureHash of concat(func,param) and can repeat to others that secureHash -> someReturn, and as in pattern calculus functions, func and return can be found, if others cooperate recursively, by asking others (L someReturn) which returns func, and asking others (R someReturn) which returns param, in the cases when number of curries (cur) remaining in func (before it would be evaled) is more than 1 (which decreases by 1 with each next curry), since (L x (R x)) equals x, forall x, so <(L x),(R x),x> is a func param return cache entry for every possible x, and the secureHash ids will know their number of curries so you can know if its part of the merkle forest vs some other func param return cache entry. This is the security primitives that the "decentralized wiki style interactive math book" aka wikibinator will be made of which makes it far easier to say true things than to say false things.
