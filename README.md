@@ -101,11 +101,7 @@ A decentralized wiki style interactive math book (for ages 0 to expert, which TO
 //But the point is, these lines of code are a sparse 4d tensor, with each "var name" being a dimension,
 //and tensors are not affected by permutation, and those tensors represent all possible pasts, present, and futures of the system,
 //therefore the whole system, in parts which do not call wiki, can in theory be computed in an infinite number of threads
-//which can branch predict eachother and operate faster than light to the extent that all exponentially increasing number
-//of possible incoming lightcone vibrations are branch predicted and use whichever of them are not excluded by known constraints locally.
-//In terms of games and realtime simulations, that means lag can be reduced, not hidden like common practices of decaying movement
-//until the next data comes in... but actually reduced, by predicting all possible next states and excluding those which cant be true together.
-//It may someday be a good branch prediction optimization for some kind of optical computer.
+//which can branch predict eachother.
 
 wikibinator = λ;
 u = λ; //easier to write u than λ
