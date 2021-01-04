@@ -48,12 +48,25 @@ public final class UndoMem{
 	
 	/** write, but can only do this writesLeft() times until you need to commit()
 	or copy int[] mem to a new UndoMem etc such as using copy().
+	WARNING: If write the same val that was already there, does not count an op, so undo() will undo the op before it.
+	This means if for example you're painting 1024x1024 screen pixels and it writes the whole screen every time,
+	and you only changed 1% of the screen, it only costs 1% that much op space so the undo history can be 100 times longer.
 	*/
 	public void writeI(int addr, int val){
 		addr &= memMask;
 		ops[sp++] = addr;
-		ops[sp++] = (val-mem[addr]); //change at addr
+		int change = val-mem[addr];
+		ops[sp++] = change; //change at addr
 		mem[addr] = val;
+		/*int changeExists = change&(change>>>16);
+		changeExists &= (changeExists>>>8);
+		changeExists &= (changeExists>>>4);
+		changeExists &= (changeExists>>>2);
+		changeExists &= (changeExists>>>1);
+		//changeExists is 0 or 1 depending if change!=0
+		sp -= (changeExists<<1); //no branching, other than mem[addr], but tested this and using the IF is faster.
+		*/
+		if(change == 0) sp-=2; //dont waste an op
 	}
 	
 	public void writeJ(int addr, long val){
