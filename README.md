@@ -1,6 +1,8 @@
 # wikibinator
 A decentralized wiki style interactive math book (for ages 0 to expert, which TODO will appear like cartoony art with drag and drop or hardcore number crunching tools that hook into cloud computing tools etc depending on the user's skill), based on a combinator (that is both a universal lambda function and a pattern calculus function of 6 parameters which has vararg lambdas) in which it is extremely easier to say true things than to say false things, based on a logic similar to godel-number where one must commit to statements about lambda called on lambda returns lambda before one can verify which lambdas they are, and in theory scaleable enough for graphics, musical instruments, GPU number crunching, etc, but lets start simple, so everyone can understand and fit the pieces of the puzzle together.
 
+UPDATE: https://github.com/benrayfield/wikibinator/blob/main/mutable.util.UndoMem.java will allow undo per 32 bits of memory back around 100 million writes, even if the writes depend on current contents of megabytes of memory at the time such as branching to do one thing or another, to do some graphics or sound op, copy a range of memory, etc... If it "runs out of gas" during that recursively, it will be able to undo back to any chosen point and continue from there.
+
 ```
 //My theory-of-everything:
 //Universe is a specific irrational fraction = the 4d cantor diagonal of <wikiState,func,param,return> -> true or false,
@@ -101,11 +103,7 @@ A decentralized wiki style interactive math book (for ages 0 to expert, which TO
 //But the point is, these lines of code are a sparse 4d tensor, with each "var name" being a dimension,
 //and tensors are not affected by permutation, and those tensors represent all possible pasts, present, and futures of the system,
 //therefore the whole system, in parts which do not call wiki, can in theory be computed in an infinite number of threads
-//which can branch predict eachother and operate faster than light to the extent that all exponentially increasing number
-//of possible incoming lightcone vibrations are branch predicted and use whichever of them are not excluded by known constraints locally.
-//In terms of games and realtime simulations, that means lag can be reduced, not hidden like common practices of decaying movement
-//until the next data comes in... but actually reduced, by predicting all possible next states and excluding those which cant be true together.
-//It may someday be a good branch prediction optimization for some kind of optical computer.
+//which can branch predict eachother.
 
 wikibinator = λ;
 u = λ; //easier to write u than λ

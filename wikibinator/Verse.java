@@ -2,7 +2,7 @@ package wikibinator;
 
 import java.util.Random;
 
-/** a sparse piece of multiverse implementing this datastruct mentioned in README.md (state of README.md as of 2021-1-3)...
+/** This is a sparse piece of multiverse implementing this datastruct mentioned in README.md (state of README.md as of 2021-1-3)...
 QUOTE
 //The main data structure for this system might (each instance) contain... sparse 4d tensor of 2 bits per cell,
 //meaning that <wikiState,func,param,return> is true (10), false (01), unknown (00), or disproofByContradiction (11),
@@ -24,6 +24,21 @@ QUOTE
 UNQUOTE.
 */
 public interface Verse{
+	
+	/** Is this immutable or mutable? Once it becomes immutable, it cant become mutable again
+	but could be copied to a new mutable one.
+	As mutable, it would only be allowed to accumulate valid TruthValue
+	from TruthValue.unknown becoming TruthValue.yes or TruthValue.no but not TruthValue.bull
+	which would only happen when 2 Verses are merged and they had some dimensions (Number) in common.
+	Given any permutation of a Verse (of all possible orders of the Number within it as sparse dims),
+	some of those logically imply (by the logic in SimpleVM.interpretedMode or optimizations of it) some yes or no,
+	but you will normally reach a point when you cant imply any more within the given dimensions
+	so would need to add more dimensions or allow the SimpleVM.interpretedMode logic to
+	tell you which dimensions need to be added. As long as you have the root dimension (λ),
+	you can derive all possible dimensions from just calling that on itself in various combos
+	(why its called wikibinator, its a combinator).
+	*/
+	public boolean isMutable();
 	
 	//TODO use primitives optimized for smaller sizes Verse,
 	//such as a long can store 15 bits of wikState, func, param, and ret, and a 2 bit truthValue,
@@ -68,5 +83,57 @@ public interface Verse{
 	and FIXME if there are none of those, then.. should this infloop or return null or what?
 	*/
 	public Number wfpObserve(Number wikiState, Number func, Number param, Random rand);
+	
+	
+	
+	public default TruthValue wfpr(int wikiState, int func, int param, int ret){
+		return wfpr((Integer)wikiState, (Integer)func, (Integer)param, (Integer)ret);
+	}
+	
+	
+	/** Returns the same long except with the uint2 truthValue replaced.
+	wfprtv is concat of 4 dim14tv2: wikiState, func, param, ret. (TODO choose order of those)
+	Each 16 bits has 14 bits of dimIndex and 2 bits of TruthValue.
+	You normally dont use the TruthValue for wikiState, func, param, but do use it for ret.
+	Its just more convenient to have it split into 4 of 16 bits,
+	and maybe it would be useful to for example have which wikiState it is be\
+	[TruthValue.unknown (00) about the question of is it that specific dim or not].
+	Or more generally each bit in dimIndex could be viewed as a TruthValue,
+	like a long could contain 32 TruthValues and each dimIndex is a TruthValue[8]?
+	That way, you dont have to just return a TruthValue for if you guessed the ret right
+	but it could fill in 8 yes andOr nos for the 8 bits (or n bits if it fits in more than a long)
+	to tell you specificly which ret it knows go with those (certainty of) wikiState, func, and param
+	(since wikiState_func_param is primaryKey and ret is value, and theres exactly 1 correct value for each primaryKey).
+	I could use each byte as 4 TruthValues, for each of wikiState func param and ret,
+	or I could split it into 1 byte of wikiState's dimIndex's TruthValue.certaintyOfYes
+	thuen 1 byte of wikiState's dimIndex's TruthValue.certaintyOfNo,
+	then 6 more bytes similarly for func param ret.
+	Or I could have 8 longs as a wfpr thats the same thing except a long instead of a byte.
+	These optimizations are causing me a problem in designing it to be efficient for
+	very small Verses (like a small icon on screen or maybe even a single voxel or single number)
+	and very big Verses (like whole internet size) and everywhere between.
+	I dont expect to need TruthValue in the dimIndexs of func and param and unknown if will need it in wikiState,
+	but it would be useful in the dimIndex of ret, so maybe divide it into these 5 things...
+	wikiState func param ret.yesBits ret.noBits, like 12 bits each so each long could be a sparse statement
+	about up to 4096 dims, that are another level deeper sparse inside as many dims as there are bits on the internet,
+	or it could also fit in a double if its 1024 dims and 10 bits each.
+	Or, if its just 1 wikiState in a certain Verse then it could have 2^16 dims.
+	*
+	public default long wfpr(long wfprtv){
+		int wikiState = 
+	}
+	
+	/** range 0 to 2^15-1 *
+	public static int func(long wfprtv){
+		return 0x7fff&(int)(wfprtv>>>45);
+	}
+	
+	public static int param(long wfprtv){
+		return 0x7fff&(int)(wfprtv>>>30);
+	}
+	
+	public static int ret(long wfprtv){
+		return 0x7fff&(int)(wfprtv>>>15);
+	}*/
 
 }
