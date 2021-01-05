@@ -3,6 +3,7 @@ package wikibinator.impl.ui;
 /** SYntax TYpe */
 public enum Syty{
 	
+	
 	/** Example: [(]) */
 	parseError,
 	
@@ -20,7 +21,13 @@ public enum Syty{
 	/** Example: !x means all possible forests of call pairs which are not the forest of call pairs called x.
 	Example: !? means no possibilities (and therefore causes TruthValue.bull in everything which depends on it)
 	cuz ? means all possibilities.
-	<br><br>				
+	<br><br>
+	//FIXME maybe this should be generalized to ForAll and Exists and NotExists and Never etc,
+	//like what Godel tried to do with integers and failed cuz every integer is finite
+	//but wikibinator deals with real numbers (bitstrings of infinite size and some are finite size),
+	//such as wikibinator does not contain any haltingOracles (which are possible)
+	//but in some cases will prove that some statements halt or do not halt.
+	<br><br>		
 	Any statement can be preceded by this to claim it is TruthValue.bull,
 	such as if someone says <5 (+ 2) 2)> which means 2+2=5 then you can say <!5 (+ 2) 2)>
 	to mean that 2+2 equals something other than 5, or say !<5 (+ 2) 2)> to say NOT on the whole statement,
@@ -37,8 +44,10 @@ public enum Syty{
 	in tensor4DOfRFPW (Verse.java) which is simply the TruthValue that a <r f p w> maps to.
 	You can expand a <x (!y !z)> into more dims (dimensions) in a tensor4DOfRFPW but
 	thats not something I want to get into any time soon cuz its so complex and expensive.
-	*/
+	*
 	allPossibilitiesExcept,
+	*/
+	
 	
 	/** Example: λ
 	means the universal function aka wikibinator.
@@ -59,6 +68,28 @@ public enum Syty{
 	*/
 	constant,
 	
+	/** VARARGLIST doesnt need its own syntax since can just create a var name for (curry unary3) and one for (curry unary4) etc,
+	such as (... [d c b a funcBody comment]) where "..." would be the name of (curry unary3)
+	and ".." would be the name of (curry unary2),
+	or whatever names you like...
+	
+	/** A vararg view of the Curry op (1 of 8 ops).
+	Example (todo choose some syntax other than <vararg>...</vararg>):
+	((curry unary3 [d c b a funcBody comment]) e) could be viewed as:
+	(<vararg>comment funcBody a b c d</vararg> e) -> <vararg>comment funcBody a b c d e</vararg>,
+	but FIXME that needs to know how many curries are left (unary2 aka (T (T λ)) unary1 aka (T λ) or λ for example),
+	and since its a vararg that takes 7 params then (<vararg>comment funcBody a b c d e</vararg> b b)
+	evals to (funcBody [b b e d c b a funcBody comment]). Thats what the Curry op does,
+	it counts down in unary while adding each next param as the first thing in a linkedlist,
+	then when the counter reaches unary0 aka λ, it gets funcBody as second last thing in the linkedlist
+	and calls funcBody on that linkedlist. A func may also choose to wait for more params
+	by calling itself on a higher unary number, when its evaled, so it can actually take
+	an infinite number of params in some cases and finite numbers of params other times
+	such as to take a variable number of params until one param equals ";" or "quit" then eval.
+	*
+	varargList,
+	*/
+	
 	/** Example: (a b c)
 	means ((a b) c).
 	*/
@@ -66,14 +97,54 @@ public enum Syty{
 	
 	/** Example: [a b c]
 	means (pair a (pair b (pair c λ)))
-	means {a {b {c λ}}}
+	means {a {b {c λ}}}... 	UPDATE: I'm taking {...} to mean sCurryList cuz its used far more often.
+	TODO? If write it as [a b c λ] instead of [a b c] then could represent pair of x y as [x y]
+	since [a b c λ] is [a [b [c λ]]].
+	That would make it more useful for cbts (complete binary tree of T or F as bitstring), like...
+	[[[T F][T T]][[F F][T F]]] aka the bitstring 101100 (excluding 100000... padding up to next powOf2),
+	and supporting bitstrings of unlimited size such as exabit in theory.
+	[[T F][T T]] is [[T F] T T].
+	[[[T F][T T]][[F F][T F]]] is [[[T F] T T] [F F] T F]. 
 	*/
-	linkedList,
+	linkedList_todoDoesNotHideTheNilAtTheEndSoIsPairsInGeneral,
 	
 	/** Example: {a b}
 	means (pair a b).
-	*/
+	UPDATE: I'm taking {...} to mean sCurryList cuz its used far more often.
+	*
 	pair,
+	*/
+	
+	/** A way of passing 1 param down a binary forest of call pairs,
+	similar to how lambdas of named params are done in Unlambda. A sCurryList defines a function,
+	and (T x) quotes x, and I/identityFunc gets x, such as {I I} is a function that calls its param on itself,
+	and ({I (T x) I} y) -> (y x y), aka <(y x y) {I (T x) I} y>.
+	<br><br>
+	Example: {a b} means (S a b).
+	Example: {a b c} means (S (S a b) c).
+	Example: {a {b c} d} means (S (S a (S b c)) c).
+	See OcfnUtil.equals() for an example of using this on a practical function.
+	TODO also the syntaxes for ST, IF, thenT, and thenConst, which are also used in OcfnUtil.
+	*/
+	sCurryList,
+	
+	/** These things dont need their own syntax since can just display like {IF condition ifTrue ifFalse} or something like that?
+	where IF is a var name.
+	
+	/** often used with sCurryList. See OcfnUtil.java in occamsfuncer for examples *
+	IF,
+	
+	/** often used with sCurryList. See OcfnUtil.java in occamsfuncer for examples *
+	then,
+	
+	/** often used with sCurryList. See OcfnUtil.java in occamsfuncer for examples *
+	thenT,
+	
+	/** often used with sCurryList. See OcfnUtil.java in occamsfuncer for examples *
+	thenConst,
+	*/
+		
+	//TODO? progn, a sequence of functions like (<progn>a b c d</progn> e) -> (d (c (b (a e)))).
 	
 	/** Example: <aReturn aFunc aParam aWikiState>.
 	Example: <aReturn aFunc aParam> uses "the same wikistate as other near things are using",
@@ -91,5 +162,8 @@ public enum Syty{
 	//and THERE IS NO = SYNTAX OTHER THAN <...>.
 	*/
 	rfpw;
+	
+	//This seems an interesting syntax similar to function currying https://en.wikipedia.org/wiki/Fexpr
+	//https://en.wikipedia.org/wiki/S-expression
 
 }

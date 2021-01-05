@@ -101,17 +101,23 @@ public class Pat implements CharSequence{
 				//FIXME ([)] would be Syty.parseError, and that can happen for any possible first char
 				switch(charAt(0)){
 				case '(': //(a b c) means ((a b) c). (a b) is a callPair, not {a b} kind of pair cuz that means ((pair a) b).
+					//FIXME UPDATE: {...} is sCurryList, not (pair x y).
 					//(a) means a.
 					//() means identityFunc so (() a) = (a) = a.
 					syty = Syty.curryList;
 				break;
 				case '[': //[a b c] means {a {b {c λ}}}
-					syty = Syty.linkedList;
+					syty = Syty.linkedList_todoDoesNotHideTheNilAtTheEndSoIsPairsInGeneral;
 				break;
-				case '{': //{x y} means (pair x y)
+				case '{': //sCurryList example: {I (T x) I}, and about that: <(y x y) {I (T x) I} y>
+					//{...} contains 2 or more things.
+					syty = Syty.sCurryList;
+				break;
+				/*case '{': //{x y} means (pair x y)
 					//Theres always 2 things in {}.
 					syty = Syty.pair;
 				break;
+				*/
 				case '<':
 					//Theres 0-4 things in <>, and each of them can be expanded to the 4 view, but usually 2-4.
 					//<return func param wikiState>
@@ -126,7 +132,14 @@ public class Pat implements CharSequence{
 					//? is the only kind of this.
 					syty = Syty.allPossibilities;
 				break;
-				case '!': //Example: !["hello" "world"] means all possible forests of call pairs other than ["hello" "world"],
+				case '!':
+					//FIXME maybe this should be generalized to ForAll and Exists and NotExists and Never etc,
+					//like what Godel tried to do with integers and failed cuz every integer is finite
+					//but wikibinator deals with real numbers (bitstrings of infinite size and some are finite size),
+					//such as wikibinator does not contain any haltingOracles (which are possible)
+					//but in some cases will prove that some statements halt or do not halt.
+					//
+					//Example: !["hello" "world"] means all possible forests of call pairs other than ["hello" "world"],
 					//but its only practically efficient to use outside a <...> statement like...
 					//<5 (+ 2) 2)> which means 2+2=5 then you can say <!5 (+ 2) 2)>
 					//to mean that 2+2 equals something other than 5, or say !<5 (+ 2) 2)> to say NOT on the whole statement.
