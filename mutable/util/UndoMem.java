@@ -53,20 +53,34 @@ public final class UndoMem{
 	and you only changed 1% of the screen, it only costs 1% that much op space so the undo history can be 100 times longer.
 	*/
 	public void writeI(int addr, int val){
+		//if(testingXYZ) lg("writeI "+addr+" "+val);
 		addr &= memMask;
 		ops[sp++] = addr;
 		int change = val-mem[addr];
 		ops[sp++] = change; //change at addr
 		mem[addr] = val;
-		/*int changeExists = change&(change>>>16);
-		changeExists &= (changeExists>>>8);
-		changeExists &= (changeExists>>>4);
-		changeExists &= (changeExists>>>2);
-		changeExists &= (changeExists>>>1);
-		//changeExists is 0 or 1 depending if change!=0
-		sp -= (changeExists<<1); //no branching, other than mem[addr], but tested this and using the IF is faster.
-		*/
 		if(change == 0) sp-=2; //dont waste an op
+		
+		/* no branching, other than mem[addr], but tested this and using the IF is faster.
+		int changeExists = change;
+		//lg("changeExists = "+Integer.toBinaryString(changeExists));		
+		changeExists |= (changeExists<<16);
+		//lg("changeExists = "+Integer.toBinaryString(changeExists));
+		changeExists |= (changeExists<<8);
+		//lg("changeExists = "+Integer.toBinaryString(changeExists));
+		changeExists |= (changeExists<<4);
+		//lg("changeExists = "+Integer.toBinaryString(changeExists));
+		changeExists |= (changeExists<<2);
+		//lg("changeExists = "+Integer.toBinaryString(changeExists));
+		changeExists |= (changeExists<<1);
+		//lg("changeExists = "+Integer.toBinaryString(changeExists));
+		changeExists >>>= 31;
+		//lg("changeExists = "+Integer.toBinaryString(changeExists));
+		//if(testingXYZ) lg("changeExists="+changeExists+" sp="+sp+" BEFORE");
+		//changeExists is 0 or 1 depending if change!=0
+		sp -= ((1-changeExists)<<1);
+		//if(testingXYZ) lg("changeExists="+changeExists+" sp="+sp+" AFTER");
+		*/
 	}
 	
 	public void writeJ(int addr, long val){
@@ -155,6 +169,7 @@ public final class UndoMem{
 	//TODO generalize to any powOf2 sizes of int[] and long[]... public UndoMem()
 	//using constructor
 	
+	static boolean testingXYZ;
 	
 	public static void main(String[] args){
 		UndoMem m = new UndoMem();
@@ -194,6 +209,8 @@ public final class UndoMem{
 			double mhz = hz*1e-6;
 			lg("doubles mhz = "+mhz+" duration="+duration);
 		}
+		
+		
 		/*
 		> ints mhz = 430.87885107300986 duration=0.0232083797454834
 		> ints mhz = 392.66626722588376 duration=0.0254669189453125
@@ -207,6 +224,7 @@ public final class UndoMem{
 		
 		
 		m.clear();
+		testingXYZ = true;
 		int vars = 0;
 		int x = vars++, y = vars++, z = vars++;
 		m.writeI(x,100);
@@ -214,18 +232,19 @@ public final class UndoMem{
 		m.writeI(z,102);
 		lg("Forward...");
 		for(int i=0; i<20; i++){
-			lg("m.readI(x)%7 == 0 ---> "+(m.readI(x)%7 == 0));
+			lg("x="+m.readI(x)+" y="+m.readI(y)+" z="+m.readI(z)+" writes="+m.writes());
 			if(m.readI(x)%7 == 0){
 				m.writeI(z, m.readI(z)+1);
 			}
 			m.writeI(x, m.readI(x)+1);
-			lg("x="+m.readI(x)+" y="+m.readI(y)+" z="+m.readI(z));
+			lg("x="+m.readI(x)+" y="+m.readI(y)+" z="+m.readI(z)+" writes="+m.writes());
 		}
 		lg("Testing undo...");
 		while(m.writes() > 0){
 			m.undo();
 			lg("x="+m.readI(x)+" y="+m.readI(y)+" z="+m.readI(z));
 		}
+		testingXYZ = false;
 	}
 
 }
