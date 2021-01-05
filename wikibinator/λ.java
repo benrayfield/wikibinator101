@@ -18,7 +18,6 @@ public strictfp interface λ extends UnaryOperator<λ>, /*Blob,*/ ob{
 	as measured by (L x (R x)) equals x forall x (such as (L u)->I and (R u)->u and (I u)->u).
 	*/
 	
-	
 	/**
 	//L and R functions removed. Derive them by combons of the universal function,
 	//save them in 2 vars named fn L and fn R, and use L.e(this) and R.e(this).
@@ -79,6 +78,7 @@ public strictfp interface λ extends UnaryOperator<λ>, /*Blob,*/ ob{
 		return compiled().apply(this,param);
 	}
 	
+	/** UnaryOperator<λ> */
 	public default λ apply(λ param){
 		return e(param);
 	}

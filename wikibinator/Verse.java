@@ -2,6 +2,8 @@ package wikibinator;
 
 import java.util.Random;
 
+import immutable.util.Blob;
+
 /** This is a sparse piece of multiverse implementing this datastruct mentioned in README.md (state of README.md as of 2021-1-3)...
 QUOTE
 //The main data structure for this system might (each instance) contain... sparse 4d tensor of 2 bits per cell,
@@ -74,7 +76,6 @@ public interface Verse{
 	*/
 	public Verse randomPermutateDims(Random rand);
 	
-	TODO
 	/** This is needed by SimpleVM to compute procedurally forward efficiently,
 	in the way that (wikiState,func,param) is like a database.table primaryKey and ret is its value,
 	and for every primaryKey there is exactly 1 value (though we may not know what it is) in the abstract math.
