@@ -47,6 +47,9 @@ public interface fn2_exploringPossibleInterface{
 	public TruthValue opIs(byte possibleOp);
 	*/
 	
+	FIXME I'm using op value of 0 to mean more than 6 params. But now that wikiState is a third child (even if only a salt)
+	that means that a whole extra bit in the op byte is available as its no longer used by wikiState being
+	pureDeterminism vs allNondeterministicWikiStates, so TODO put isKnownVsUnknown in that bit, or something like that. 
 	/** If op is 0 then it means TruthValue.unknown for every
 	possible question about the op (such as TruthValue opIs(byte possibleOp)).
 	If op is nonzero, then it means that is the op, which can be used without further statistical thought in SimpleVM
