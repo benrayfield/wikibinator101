@@ -126,23 +126,10 @@ public class Pat implements CharSequence{
 					//? is the only kind of this.
 					syty = Syty.allPossibilities;
 				break;
-				case '!': //Example: !["hello" "world"] means all possible forests of call pairs other than ["hello" "world"].
-					//Any statement can be preceded by this to claim it is TruthValue.bull,
-					//such as if someone says <5 (+ 2) 2)> which means 2+2=5 then you can say <!5 (+ 2) 2)>
-					//to mean that 2+2 equals something other than 5, or say !<5 (+ 2) 2)> to say NOT on the whole statement,
-					//or say <x (!y !z)> to mean x equals something other than y called on something other than z,
-					//keeping in mind that equality is by forest shape (of call pairs, where all paths lead to λ)
-					//and that "variable names" do not change globalIds or forest shapes and are only for convenience
-					//and any disagreement within the system can in theory be solved by converting all relevant parts
-					//to tensor4DOfRFPW+triangleArray2DOfEquality form (Verse.java, for example) and filling in
-					//the relevant TruthValues without any TruthValue.bull occurring,
-					//only TruthValue.yes, TruthValue.no, and in parts you dont need to know can leave as TruthValue.unknown.
-					//The Syty.allPossibilities and Syty.allPossibilitiesExcept syntaxs have an indirect representation in
-					//the conditionalProbability of multiple TruthValues in tensor4DOfRFPW but that is an expensive calculation.
-					//There is a very cheap direct representation of every possible <r f p w> and !<r f p w>
-					//in tensor4DOfRFPW (Verse.java) which is simply the TruthValue that a <r f p w> maps to.
-					//You can expand a <x (!y !z)> into more dims (dimensions) in a tensor4DOfRFPW but
-					//thats not something I want to get into any time soon cuz its so complex and expensive.
+				case '!': //Example: !["hello" "world"] means all possible forests of call pairs other than ["hello" "world"],
+					//but its only practically efficient to use outside a <...> statement like...
+					//<5 (+ 2) 2)> which means 2+2=5 then you can say <!5 (+ 2) 2)>
+					//to mean that 2+2 equals something other than 5, or say !<5 (+ 2) 2)> to say NOT on the whole statement.
 					syty = Syty.allPossibilitiesExcept;
 				break;
 				case '/': //comment or /someNameThatStartsWithSlash
