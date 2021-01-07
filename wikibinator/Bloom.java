@@ -22,6 +22,22 @@ but it will actually be stored in sparse combos of primitive arrays.
 */
 public interface Bloom{
 	
+	TODO no nondeterminism for now, and just get debugStepInto and debugStepOver working in bloom, of wikibinator
+	(aka where wikiState is (lazig (S I I) (S I I)))?
+	Just the ability for many people and computers to share <return func param> (RFP) cache would be big progress.
+	TODO need the ability to replace java etc's == operator with just viewing the TruthValues in self's childs recursively
+	without knowing which of those childs equal eachother or not. Use the fact that if x.l==y.l and x.r==y.r then x==y,
+	and some small constant depth to combinator that to generate the relevant statements (in terms of their parent's TruthValue)
+	of are they equal or not or unknown... Build callquad-like (as in occamsfuncer) implementation of wikibinator in Bloom that way.
+	Optimize later.
+	Use model of computing where an axiom sees all 2^(n+1)-1 TruthValues of a node x and n depth below it (offby1error?)
+	and outputs a map of the integers in range 0..(2^(n+1)-1) into that same range, allowing duplicate output values,
+	and wherever its output integer, copy that binary forest node to those 0 or more places within the n depth,
+	then OR the TruthValues with eachother, and it better NEVER derive any TruthValue.bull.
+	??? Is that what I want?
+	
+	
+	
 	FIXME... it shouldnt need to know this at the VM level. I'll put in optimizations
 	to put in solid blocks of 1s and 0s if needed, or whatever datastruct, nomatter how big it makes it,
 	but the core has to be simple. You should be able to pair any node with any node and generate a
