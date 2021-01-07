@@ -26,6 +26,7 @@ public interface Bloom{
 	to put in solid blocks of 1s and 0s if needed, or whatever datastruct, nomatter how big it makes it,
 	but the core has to be simple. You should be able to pair any node with any node and generate a
 	SPECIFIC yes/1 or no/0 from it (even if it costs infinite compute time and memory to do so).
+	Fortunately the universe is infinite, but before such possibilities are explored, compiled to CPUs and GPUs.
 	/** Axioms are only called on EVEN bloom nodes (FIXME or should it be only ODD... would work either way but must choose one design),
 	which can of course act on ODD bloom nodes by looking 1 deeper within
 	the behaviors of the axiom. An example of an axiom is to look in 2 certain position relative to self node
