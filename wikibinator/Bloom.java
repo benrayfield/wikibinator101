@@ -22,7 +22,12 @@ but it will actually be stored in sparse combos of primitive arrays.
 */
 public interface Bloom{
 	
-	/** Axioms are only called on EVEN bloom nodes, which can of course act on ODD bloom nodes by looking 1 deeper within
+	FIXME... it shouldnt need to know this at the VM level. I'll put in optimizations
+	to put in solid blocks of 1s and 0s if needed, or whatever datastruct, nomatter how big it makes it,
+	but the core has to be simple. You should be able to pair any node with any node and generate a
+	SPECIFIC yes/1 or no/0 from it (even if it costs infinite compute time and memory to do so).
+	/** Axioms are only called on EVEN bloom nodes (FIXME or should it be only ODD... would work either way but must choose one design),
+	which can of course act on ODD bloom nodes by looking 1 deeper within
 	the behaviors of the axiom. An example of an axiom is to look in 2 certain position relative to self node
 	and if one of them equals a certain 256 bits then hash the other bits and write the sha3_256 of those bits into a third place,
 	or an example of an axiom is to find some numbers and add them and write that into another place,
