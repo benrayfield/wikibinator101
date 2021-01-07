@@ -22,6 +22,31 @@ but it will actually be stored in sparse combos of primitive arrays.
 */
 public interface Bloom{
 	
+	/** Axioms are only called on EVEN bloom nodes, which can of course act on ODD bloom nodes by looking 1 deeper within
+	the behaviors of the axiom. An example of an axiom is to look in 2 certain position relative to self node
+	and if one of them equals a certain 256 bits then hash the other bits and write the sha3_256 of those bits into a third place,
+	or an example of an axiom is to find some numbers and add them and write that into another place,
+	or could emulate any opcodes of any system, binary blobs, neuralnets, GPU, music tools, etc, as long as the math is strict.
+	<br><br>
+	x.odd()!=x.l().odd(). x.l().odd()==x.r().odd().
+	<br><br>
+	With this, you dont need to know height in binary forest, as it might be infinitely deep
+	andOr have cycles (like it could encode mandelbrot fractal to infinite depth,
+	though probably not efficiently the deeper it gets). 
+	<br><br>
+	This might be needed to emulate 3-way trees and to prove it is or is not an internal node of a 3-way-tree
+	vs a 3-way-tree node such as x.l.l and x.l.r and x.r.l might be the 3 childs, and x.r.r is all TruthValue.no
+	or x.r.r equals x, or any way of you dont have to care about x.r.r's value if you're using it as a 3-way-tree.
+	The purpose of 3-way-trees is if you want the ability to "do a function call of x on y" then you do <x y leaf>
+	for any x and y but constraints only apply to leaf which is where "internal calculations of a lambda VM" happen,
+	and maybe you would have a use for the fourth child if thats the return value, or something,
+	but the point is, it needs at least a 3-way tree, not a 2-way, so without this isEven() func,
+	it would be unable to prove that since all nodes start as TruthValue.unknown.
+	Just alternate isEven at each next depth. Dont need to store it except maybe to have 2 subclasses of Bloom
+	or a final boolean var in them.
+	*/
+	public boolean odd();
+	
 	public TruthValue v();
 	
 	/** 31 TruthValues in a long, as binheapIndexing of 1 2 4 8 16 TruthValues at depths 0..4 */
