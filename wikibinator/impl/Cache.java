@@ -1,6 +1,7 @@
 /** Ben F Rayfield offers this software opensource MIT license */
 package wikibinator.impl;
 import static wikibinator.impl.ImportStatic.*;
+
 import wikibinator.λ;
 
 public class Cache{

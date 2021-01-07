@@ -1,6 +1,18 @@
 # wikibinator
 A decentralized wiki style interactive math book (for ages 0 to expert, which TODO will appear like cartoony art with drag and drop or hardcore number crunching tools that hook into cloud computing tools etc depending on the user's skill), based on a combinator (that is both a universal lambda function and a pattern calculus function of 6 parameters which has vararg lambdas) in which it is extremely easier to say true things than to say false things, based on a logic similar to godel-number where one must commit to statements about lambda called on lambda returns lambda before one can verify which lambdas they are, and in theory scaleable enough for graphics, musical instruments, GPU number crunching, etc, but lets start simple, so everyone can understand and fit the pieces of the puzzle together.
 
+UPDATE: https://github.com/benrayfield/wikibinator/blob/main/wikibinator/Bloom.java will be a sparse bloom-filter
+scaleable up to the size of running the whole internet on it at gaming-low-lag. Its not a specific algorithm
+but is a binary forest where each node has 2 mutable bits as TruthValue.yes, TruthValue.no, TruthValue.unknown, or TruthValue.bull,
+and is a math abstraction that can wrap binary blobs. Its a sparse hill-climbable memory
+that can sync writes between an exponential number of computers at once and every write that any
+2 computers do will always be the same value so read write locking is unnecessary
+except a little of it to check for TruthValue.bull which will occur far less often than yes no or unknown.
+An axiom is any function of [map of binary forest node to TruthValue] to another [map of binary forest node to TruthValue]
+and such maps can be ORed together, and as long as that doesnt cause them to have any TruthValue.bull, its ok,
+even though bull may occur later unknown that its implied yet, but there is no time in the system
+so if there will be bull later then it can be proven that theres bull now if you look in the right combos.
+
 UPDATE: https://github.com/benrayfield/wikibinator/blob/main/mutable/util/UndoMem.java will allow undo per 32 bits of memory back around 100 million writes, even if the writes depend on current contents of megabytes of memory at the time such as branching to do one thing or another, to do some graphics or sound op, copy a range of memory, etc... If it "runs out of gas" during that recursively, it will be able to undo back to any chosen point and continue from there.
 
 ```

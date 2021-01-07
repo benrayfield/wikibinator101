@@ -1,6 +1,7 @@
 /** Ben F Rayfield offers this software opensource MIT license */
 package wikibinator.impl;
 import java.util.function.Supplier;
+
 import wikibinator.Compiled;
 import wikibinator.λ;
 

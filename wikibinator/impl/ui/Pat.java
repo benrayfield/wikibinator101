@@ -132,7 +132,7 @@ public class Pat implements CharSequence{
 					//? is the only kind of this.
 					syty = Syty.allPossibilities;
 				break;
-				case '!':
+				/*case '!':
 					//FIXME maybe this should be generalized to ForAll and Exists and NotExists and Never etc,
 					//like what Godel tried to do with integers and failed cuz every integer is finite
 					//but wikibinator deals with real numbers (bitstrings of infinite size and some are finite size),
@@ -145,6 +145,7 @@ public class Pat implements CharSequence{
 					//to mean that 2+2 equals something other than 5, or say !<5 (+ 2) 2)> to say NOT on the whole statement.
 					syty = Syty.allPossibilitiesExcept;
 				break;
+				*/
 				case '/': //comment or /someNameThatStartsWithSlash
 					if(length() > 1 && charAt(2)=='/'){ //TODO choose some single char to start a comment? Or use string literal?
 						syty = Syty.ignore;

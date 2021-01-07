@@ -42,11 +42,12 @@ public class Shell implements UnaryOperator<String>{
 	
 	/** Example: "(a b (c d e) f)" -> "Example: "(((a b)((c d) e))f)" */
 	public String convertToDeepParens(String expr){
-		List<String> tokens = (List) iterToList(new StringTokenizer(expr,delims,true).asIterator());
+		/*List<String> tokens = (List) iterToList(new StringTokenizer(expr,delims,true).asIterator());
 		List<String> 
 		for(String token : ListUtil.reverse(tokens)){
 			
-		}
+		}*/
+		throw new RuntimeException("TODO");
 	}
 	
 	/** TODO "//" is a delim? yes and comment (or output as comment) ends at \n (\r or \r\n becomes \n),
@@ -60,7 +61,7 @@ public class Shell implements UnaryOperator<String>{
 	Example: "(x (y z))" -> "` x ` y z".
 	Example: "(a b (c d e) f)" ->  "` ` ` a b ` ` c d e f".
 	UPDATE: returns ParseTree instead of String. If you want that String, call ParseTree.toUnlambdaLikeCallPairs
-	*/
+	*
 	public ParseTree convertToUnlambdalikeCallPairs(String expr){
 		List<String> tokens = (List) iterToList(new StringTokenizer(expr,delims,true).asIterator());
 		int height = 0;
@@ -89,7 +90,7 @@ public class Shell implements UnaryOperator<String>{
 				stack.peek().name = token;
 			}
 		}
-	}
+	}*/
 	
 	static <T> List<T> iterToList(Iterator<T> iter){
 		List<T> list = new ArrayList();

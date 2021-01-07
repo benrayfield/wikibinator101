@@ -1,8 +1,8 @@
 package wikibinator;
 import static wikibinator.impl.ImportStatic.*;
 import java.util.function.UnaryOperator;
+
 import wikibinator.Compiled;
-//TODO import immutable.lazycl.Blob;
 
 public strictfp interface λ extends UnaryOperator<λ>, /*Blob,*/ ob{
 	

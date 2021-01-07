@@ -3,6 +3,7 @@ package wikibinator;
 import java.util.Random;
 
 import immutable.util.Blob;
+import immutable.util.TruthValue;
 
 /** This is a sparse piece of multiverse implementing this datastruct mentioned in README.md (state of README.md as of 2021-1-3)...
 QUOTE

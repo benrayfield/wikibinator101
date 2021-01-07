@@ -1,4 +1,4 @@
-package wikibinator;
+package immutable.util;
 
 /** Unknown is the default answer for every question,
 which may become yes or no but if it becomes both at once

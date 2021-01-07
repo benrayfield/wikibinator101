@@ -1,5 +1,7 @@
 package wikibinator;
 
+import immutable.util.TruthValue;
+
 /** This is an attempt to reduce the number of tensorND from tensor4D to tensor2D,
 using statements like: "(S I I y) = y" where (S I I y) not isHalted and yes willHalt,
 and <y (S I I y)> yes twoChildReturnValuesEqual.
@@ -36,6 +38,7 @@ Its a 3-way forest where all paths lead to leaf, but the space of possibilities 
 */
 public interface fn2_exploringPossibleInterface{
 	
+	/*
 	"TODO read comment of this class"
 	
 	TODO put all the TruthValues and opIfNonzero etc into an int per fn2_exploringPossibleInterface
@@ -43,13 +46,15 @@ public interface fn2_exploringPossibleInterface{
 	
 	
 	
-	/** or should there be a TruthValue for each of 8 bits of its op? This is the op in SimpleVM. *
+	** or should there be a TruthValue for each of 8 bits of its op? This is the op in SimpleVM. *
 	public TruthValue opIs(byte possibleOp);
-	*/
+	*
 	
 	FIXME I'm using op value of 0 to mean more than 6 params. But now that wikiState is a third child (even if only a salt)
 	that means that a whole extra bit in the op byte is available as its no longer used by wikiState being
-	pureDeterminism vs allNondeterministicWikiStates, so TODO put isKnownVsUnknown in that bit, or something like that. 
+	pureDeterminism vs allNondeterministicWikiStates, so TODO put isKnownVsUnknown in that bit, or something like that.
+	*/
+	
 	/** If op is 0 then it means TruthValue.unknown for every
 	possible question about the op (such as TruthValue opIs(byte possibleOp)).
 	If op is nonzero, then it means that is the op, which can be used without further statistical thought in SimpleVM

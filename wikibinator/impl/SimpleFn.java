@@ -4,6 +4,7 @@ import static wikibinator.impl.ImportStatic.*;
 //import static wikibinator.fn.*;
 //import static wikibinator.impl.Cache.*;
 import java.util.function.Supplier;
+
 import wikibinator.Compiled;
 import wikibinator.WikiState;
 import wikibinator.λ;
