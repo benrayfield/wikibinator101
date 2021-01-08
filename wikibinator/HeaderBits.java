@@ -3,22 +3,46 @@ import static mutable.util.Lg.*;
 import immutable.util.TruthValue;
 
 /** (long)λ.header() is made of TruthValues of 2 bits each,
-maybe storing the YES bits in the high 32 bits of a long and the NO bits in the low 32 bits.
-TODO try to fit it in 32 or 48 bits so theres more bits left in id256 for secureHash
-(and if its not a secureHash then its up to 128 bits of literal cbt).
+storing the YES bits in the high 32 bits of a long and the NO bits in the low 32 bits.
+<br><br>
+Every binary forest node is valid. At height 0 theres 1 possible node.
+At height 1 and below theres 2 nodes. At height 3 and below theres 5 nodes.
+At each next height, the total number of nodes (at and below that height)
+is nodesAtOneHeightLower^2+1 which I've verified by bruteForce up to a few levels deep by hash.
+A λ is such a binary forest node, as the math spec for what it does,
+but in practice it will be equally fast as any other GPU software for some kinds of calculations,
+equally fast as music tools software on CPU, and various kinds of JIT compilers used together.
+<br><br>
+If its halted then it returns itself.
+If its not halted then it returns some other node,
+or multiple nodes if theres multiple equal forest shapes in duplicate nodes (before dedup)
+that 2 kinds of equality in a parent node about its childs describes:
+returnValOfLeftChildEqualsReturnValOfRightChild and leftAndRightForestShapesEqual.
+Hash ids and dedup are lazyEvaled, and both those kinds of equality can be used
+without triggering that lazyEval. Hash ids describe the leftAndRightForestShapesEqual kind of equality.
+All ids have the 64 bits of header (32 TruthValues) which can do everything in this HeaderBits enum
+except some parts of it (like about the callquads) are for possible future expansion.
 <br><br>
 Similar to immutable.occamsfuncer.impl.optimize.id.IdField.
 <br><br>
+The default kind of id is 256 bits (id256), including 3 longs and this header long.
 This defines 32 TruthValues which together fit in a long.
-The other 192 bits are either a secureHash (merkle forest) or 1..128 bits of literal cbt.
+The other 192 bits are either a secureHash (merkle forest) or 1..128 bits of literal cbt
+(such as you could put 2 doubles for a complexnum in it, or a string of 16 utf8 bytes,
+or a string of 32 utf8 bytes
+in a parent node with (pair leftChild) and rightChild each having 16 bytes).
+<br><br>
 For higher security you can use for example sha3_256 or sha3_384 with these same header TruthValues
 and maybe include 64 bits of bize (bitstring size) andOr other things you might want to fit in 512 bits.
-192 bits means you would have to create and remember about 2^96 nodes before finding 1 duplicate,
+192 bits means you would have to create and remember about 2^96 nodes before finding 1 collision,
 which is maybe within the abilities of the strongest supercomputers as of Y2021
 BUT it would be very very expensive which there are far more valuable calculations to spend that on,
 or remember a random set of 2^64 of them 2^64 times since either way that multiplies to 2^192...
 AND even if they do find a few duplicates, its squared times that hard to find an id
 thats the same as a specific id such as a specific function that many people and computers together use.
+Even if some collisions happen, theres very strong security by math axioms of how the functions fit together
+so it would probably recover or with some slight adjustments to the VM
+or especially a bunch of compatible opensource forks of the VM working together in realtime in p2p networks.
 */
 public enum HeaderBits{
 	
@@ -70,13 +94,47 @@ public enum HeaderBits{
 	Which of those it is depends on lowBitsOfHeight. Each cbt twice as big as the last is at height+2,
 	and T and F are the 2 possible cbts of 1 bit each. There is no cbt of 0 bits, but T is the empty bitstring,
 	similar to (pair F T) is the bitstring 0 and (pair T T) is the bitstring 1
-	and (pair (pair T F) (T T)) is the bitstring 101 and (pair (pair T F) (T F)) is the bitstring 10.
+	and (pair (pair T F) (pair T T)) is the bitstring 101 and (pair (pair T F) (pair T F)) is the bitstring 10.
 	Literal does not specify how to interpret the cbt (as bitstring or general cbt
 	or just a bunch of pairs and Ts and Fs). That depends on the functions which take cbts as params.
+	<br><br>
+	Theres a syntax for pairs, like  (pair (pair T F) (pair T T)) is [[T F] T T] aka [[T F][T T]],
+	and if you want a linkedlist of a b c d e its [a b d d e λ] aka [a [b [d [d [e λ]]]]].
 	*/
 	isLiteral(1, true),
 	
-	/** TODO remove this? I'm undecided if will keep this, since isDeterministic might be enough.
+	/** An optimization of the call (L x).
+	I dont know about the header bits for this, if it should be self's header bits vs self.R's header bits,
+	(especially cuz this TruthValue is in self's header)
+	but it is certain that if this is TruthValue.yes then the 192 bits of id are the 192 bits of self.R
+	AND self.L == theLFunction
+	AND that self.R.lcall_myHash192IsOfMyRAndMyLIsTheLFunc is TruthValue.no,
+	AND that self.R.rcall_myHash192IsOfMyRAndMyLIsTheRFunc is TruthValue.no,
+	aka this is the call (L x) and has x's 192 hash bits and x is not such an lcall or rcall (else hash normally).
+	*/
+	lcall_myHash192IsOfMyRAndMyLIsTheLFunc(1, true),
+	
+	/** An optimization of the call (R x).
+	I dont know about the header bits for this, if it should be self's header bits vs self.R's header bits,
+	(especially cuz this TruthValue is in self's header)
+	but it is certain that if this is TruthValue.yes then the 192 bits of id are the 192 bits of self.R
+	AND self.L == theRFunction
+	AND that self.R.lcall_myHash192IsOfMyRAndMyLIsTheLFunc is TruthValue.no,
+	AND that self.R.rcall_myHash192IsOfMyRAndMyLIsTheRFunc is TruthValue.no,
+	aka this is the call (R x) and has x's 192 hash bits and x is not such an lcall or rcall (else hash normally).
+	*/
+	rcall_myHash192IsOfMyRAndMyLIsTheRFunc(1, true),
+	
+	/** Similar to lcall and rcall, but for pair instead of L or R.
+	An optimization to avoid storing (pair x) in ((pair x) y) aka (pair x y)
+	and to only store x, y, and (pair x y), but be able to generate the id of (pair x) where
+	hashing that id with the id of y generates the id of (pair x y).
+	*/
+	pcall_myHash192IsOfMyRAndMyLIsThePairFunc(1, true),
+	
+	/** TODO is this also useful for defining var names, or is it just a symbol for wikiStates you dont
+	want to define as specific functions but converge instead? And how would the Reflect op see it?
+	TODO remove this? I'm undecided if will keep this, since isDeterministic might be enough.
 	A node is salt if its globalId says it is salt OR if isFake aka its an invalid globalId
 	such as 256 random bits that are claimed to not be salt.
 	aSymbolRepresentingTheUniverse (see comment of isDeterministic) is a globalId made of salt,
@@ -84,28 +142,24 @@ public enum HeaderBits{
 	*/
 	isSalt(1, true),
 	
-	/** an optimization to avoid storing (pair x) in ((pair x) y) aka (pair x y)
-	and to only store x, y, and (pair x y), but be able to generate the id of (pair x) where
-	hashing that id with the id of y generates the id of (pair x y).
-	*/
-	leftIsThePairFunc(1, true),
-	
-	/** For possible future expansion to use debutStepInto vs debugStepOver similar to occamsfuncer callquad
+	/** For possible future expansion to use debugStepInto vs debugStepOver similar to occamsfuncer callquad
 	which has func param stack cacheKey and isParentsFunc. But wikibinator.Bloom has a different way of doing it.
 	*/
 	hasStackfunc(1, true),
 	
-	/** For possible future expansion to use debutStepInto vs debugStepOver similar to occamsfuncer callquad
+	/** For possible future expansion to use debugStepInto vs debugStepOver similar to occamsfuncer callquad
 	which has func param stack cacheKey and isParentsFunc. But wikibinator.Bloom has a different way of doing it.
 	*/
 	hasStackparam(1, true),
 	
-	/** For possible future expansion to use debutStepInto vs debugStepOver similar to occamsfuncer callquad
+	/** For possible future expansion to use debugStepInto vs debugStepOver similar to occamsfuncer callquad
 	which has func param stack cacheKey and isParentsFunc. But wikibinator.Bloom has a different way of doing it.
 	*/
 	hasCachekey(1, true),
 	
-	/** Self and this many curries viewed by λ.L().isLeaf() .. λ.L().L().L().L().L().L().isLeaf().
+	/** This is where to store the λ.op byte used in a switch statement in SimpleVM.interpretedMode,
+	and in optimizations of it such as lwjgl opencl GPU and javassist.
+	Self and this many curries viewed by λ.L().isLeaf() .. λ.L().L().L().L().L().L().isLeaf().
 	Knowing that allows recursing less deep to know what opcode to do.
 	<br><br>
 	Usually you can only know x.isLeaf or !x.isLeaf if x.isHalted.
@@ -115,16 +169,21 @@ public enum HeaderBits{
 	/** If true, then there are more digits of the height integer than fits in lowBitsOfHeight */
 	isHigher(1, true),
 	
-	/** If !isHigher then this is the low n bits of the height integer */
+	/** If !isHigher then this is all bits of the unsigned height integer, else this is only the low n bits of it.
+	TODO should this be ignored (set to its max value?) if isHigher since it
+	might make it harder to compute without having to know how deep you are?
+	*/
 	lowBitsOfHeight(7, true),
 	
-	/** This is how much space in header is unused and is reserved for future expansion.
+	/** These 2 TruthValue spaces were taken by the L and R optimizations 2021-1-8.
+	This is how much space in header is unused and is reserved for future expansion.
 	Leave these as TruthValue.unknown.
 	<br><br>
 	FIXME you cant hash before observing its bits. Are these TruthValues (2 bits each) in the
 	hash or not? and if they're in the hash, are they 1 bit each as they cant be unknown or bull?)
+	*
+	reservedForFutureExpansion(0, false),
 	*/
-	reservedForFutureExpansion(2, false),
 	
 	/** True if this is a fake node such as random bits made up pretending to be a globalId
 	or any secureHash id which can reach those. False if have verified all the way down to leaf
@@ -134,12 +193,26 @@ public enum HeaderBits{
 	*/
 	isFake(1, false),
 	
-	/** canBeHalted(x) = (x.l.isHalted & x.r.isHalted &
+	/** isHalted(x) = (x.l.isHalted & x.r.isHalted &
 	(x.isLeaf | x.l.isLeaf | x.l.l.isLeaf | x.l.l.l.isLeaf | x.l.l.l.l.isLeaf | x.l.l.l.l.l.isLeaf)).
-	If !canBeHalted(x) then !x.isHalted, but if canBeHalted(x) then x.isHalted or !x.isHalted,
-	cuz those childs might have changed to make canBeHalted(parent) true but parent has not been updated yet. 
+	Of course the change from TruthValue.unknown to TruthValue.yes of isHalted might not happen right away,
+	but whatever you want to prove, whatever is valuable to you, you can accelerate it.
 	*/
 	isHalted(1, false),
+	
+	/** TruthValue.unknown is especially useful here since in some cases it costs
+	infinite compute cycles and memory to know if a certain lambda call halts or not,
+	but other times it can be known quickly, and everywhere between.
+	willHalt(x) becomes true when <x y> and y.isHalted or if it can be proven some other way
+	such as if its noticed that its a loop that counts from 1 to 2^1000000000000000000000000000
+	then you dont have to compute all that, just add that axiom to your VM (by opensource forking it)
+	to look for that kind of thing and know it will halt.
+	Similarly if <x (S I I (S I I))> then you can set x.willHalt to TruthValue.no.
+	All things which do not halt equal (S I I (S I I)) by returnValOfLeftChildEqualsReturnValOfRightChild
+	aka <m (S I I (S I I))>.returnValOfLeftChildEqualsReturnValOfRightChild is TruthValue.yes
+	if !m.willHalt, or they could all be TruthValue.unknown.
+	*/
+	willHalt(1, false),
 	
 	/** a binary blob of powOf2 number of bits, and can often (in theory, TODO) be stored in primitive array.
 	Is a complete binary tree of bits such as (pair (pair T F) (pair T T)).
@@ -160,19 +233,71 @@ public enum HeaderBits{
 	
 	returnValOfLeftChildEqualsReturnValOfRightChild(1, false),
 	
-	/** true if left child is same forest shape as right child */
-	leftAndRightForestShapesEqual(1, false),
-	
-	/** TruthValue.unknown is especially useful here since in some cases it costs
-	infinite compute cycles and memory to know if a certain lambda call halts or not,
-	but other times it can be known quickly, and everywhere between.
+	/** true if left child is same forest shape as right child.
+	This isnt much useful if you have the 192 bits of secureHash, since you just compare those,
+	but hash ids are lazyEvaled and dedup is lazyEvaled so λ.java instances can use this
+	to say that some things equal or not equal in forest shape.
+	This is not the same as returnValOfLeftChildEqualsReturnValOfRightChild kind of equality
+	which is equality of the forest shape of what each child returns (or returns itself if child isHalted).
 	*/
-	willHalt(1, false);
+	leftAndRightForestShapesEqual(1, false);
 	
 	/** number of 2-bit TruthValues */
 	public final int tvs;
 	
 	public final boolean isPartOfMerkleForest;
+	
+	/** High 32 bits are the yes parts. Low 32 bits are the no parts.
+	AND those to get bull. AND(NOT NOT) those to get unknown.
+	AND it with valMask to replace all [yes, no, and bull] with unknown in the val without affecting key/merkle.
+	<br><br>
+	In an id256, the first n bits (UPDATE: its not a solid range in the header long)
+	for some constant n) are key, and the other bits are val.
+	The last 64 bits is a long that has some bits of key and some bits of val. The other 3 longs are key only.
+	Bits where isPartOfMerkleForest==true ae part of key, else they are part of val.
+	This valMask long selects val. aVal&(~valMask) removes the val (sets it all to TruthValue.unknown)
+	and and thats the long that goes with the other 3 longs as 256 bits to hash.
+	Keep in mind when designing hashing algorithms that sha3_256 costs 1 cycle to hash up to 135 bytes
+	and sha2_256 costs 1 cycle to hash up to 55 bytes. sha3_256 (or maybe sha3_224) (or maybe derive a sha3_192?)
+	will be the default hash algorithm.
+	Functions can be derived that take a function as parameter and return a cbt256 or cbt512 as a hash
+	BUT ONLY FOR HALTED FUNCTIONS, SINCE IF THEY ARENT HALTED, THEN OTHER FUNCTIONS CANT SEE THEM YET,
+	BUT YOU COULD EMULATE THE NONHALTED BINARY FOREST INTERNAL WORKINGS OF THE VM (THE id256s
+	SOME OF WHICH ARE HALTED AND SOME OF WHICH ARE NOT) AS PAIRS INSTEAD OF FUNCTION CALL PAIRS,
+	AS THE PAIR FUNCTION IS λx.λy.λz.zxy AKA CHURCH PAIR FUNCTION, OR SIMILAR FOR LAZIG INSTEAD OF CHURCH PAIR,
+	WHERE LAZIG IS λx.λy.λz.xy AND TODO DEFINE THE SPECIFIC LAZIG FUNCTION WHICH DOES THAT,
+	like occamsfuncer has a lazig but as of 2021-1-8 wikibinator has not derived one yet.
+	An example of lazyEval of (x y) is (S (T x) (T y)) cuz <(x y) (S (T x) (T y) λ)>,
+	and <m n> means m and n return the same thing aka m=n and n=m.
+	TODO make sure the Reflect op is complete enough for example it has to know the isDeterministic bit
+	to be able to hash it, so put that (either that or getWikiState) as the 4th thing the Reflect op can do,
+	as Reflect currently only does L, R, and IsLeaf, but has space for 1 more thing.
+	Also the GetWikiState op has space for 3 more things, and T and F each have space for 1 more thing.
+	*/
+	public static final long valMask;
+	static{
+		long m = 0;
+		long maskPrinter = 0x100000001L;
+		for(HeaderBits h : HeaderBits.values()){
+			for(int i=0; i<h.tvs; i++){
+				if(!h.isPartOfMerkleForest){ //is part of val
+					m |= maskPrinter;
+				}
+				maskPrinter >>>= 1;
+			}
+		}
+		valMask = m;
+	}
+	public static final long keyMask = ~valMask;
+	
+	public static final long yesMask = 0xffffffff00000000L;
+	
+	public static final long noMask =  0x00000000ffffffffL;
+	
+	/** header is 32 TruthValues. Returns true iff any of them are TruthValue.bull */
+	public static boolean hasAnyBull(long header){
+		return ((int)(header>>32)&(int)header)!=0;
+	}
 	
 	HeaderBits(int tvs, boolean isPartOfMerkleForest){
 		this.tvs = tvs;
