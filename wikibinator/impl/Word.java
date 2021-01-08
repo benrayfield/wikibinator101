@@ -6,13 +6,21 @@ import java.util.Random;
 import immutable.util.MathUtil;
 import immutable.util.Text;
 import mutable.util.Rand;
+import wikibinator.Compiled;
+import wikibinator.λ;
 
 /** uint256, the default "word size" of this system such as id256,
 though you can derive other id sizes and types at runtime
 if you want (TODO verify that and fix if its not true).
 This is an efficient representation of cbt256.
+<br><br>
+As a λ this is a cbt256 which may be the id of some other λ.
+UPDATE: cant efficiently be a λ cuz that has a mutable long header,
+and this doesnt have a long field to update that. Or should this just pay the extra 64 bits?
+TODO Just use ArrayCbt<long[]> (copy some code from occamsfuncer) instead,
+or something like it but optimized for 4 final long fields???
 */
-public final class Word implements Comparable<Word>{
+public final class Word implements Comparable<Word>/*, λ*/{
 	
 	public final long a, b, c, d;
 	
@@ -71,7 +79,7 @@ public final class Word implements Comparable<Word>{
 	}
 	
 	public int hashCode(){
-		while(hash == 0){
+		if(hash == 0){
 			long g = saltA*a+saltB*b+saltC*c+saltD*d;
 			hash = ((int)(g>>32)^(int)g);
 			if(hash == 0) hash = 1;

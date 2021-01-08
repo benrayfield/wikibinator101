@@ -1,4 +1,4 @@
-package wikibinator;
+package wikibinator.impl.veryExperimental;
 
 import immutable.util.TruthValue;
 

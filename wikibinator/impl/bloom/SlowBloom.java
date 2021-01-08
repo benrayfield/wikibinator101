@@ -3,7 +3,7 @@ package wikibinator.impl.bloom;
 import java.util.concurrent.ForkJoinPool;
 
 import immutable.util.TruthValue;
-import wikibinator.Bloom;
+import wikibinator.impl.veryExperimental.Bloom;
 
 /** The simplest unoptimized implementation of Bloom. It literally stores 1 TruthValue per Bloom
 instead of in sparse combos of primitive arrays which would be needed for practical efficiency.

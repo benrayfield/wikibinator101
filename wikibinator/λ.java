@@ -3,9 +3,73 @@ import static wikibinator.impl.ImportStatic.*;
 import java.util.function.UnaryOperator;
 
 import wikibinator.Compiled;
+import wikibinator.impl.TODO;
+import wikibinator.impl.Word;
+import wikibinator.impl.it;
+import wikibinator.impl.of;
+import wikibinator.impl.ok;
+import wikibinator.impl.put;
 
 public strictfp interface λ extends UnaryOperator<λ>, /*Blob,*/ ob{
 	
+	/** eval */
+	public λ e(){
+		TODO use SimpleFn.cacheAnyRet (debugStepOver) and if thats not there then debugStepInto aka recurse to compute it
+		then cache it.
+		
+		TODO is param of eval an ok place to put a maxSpend-like param,
+		or should that (as I've been planning since the start of wikibinator) stay entirely in wikiState?
+		What if wikiState calls such an eval(...spend/wallet/maxSpend/solve/etc-related params...)
+		as wikiState can be nondeterministic as long as it converges to be consistent RFPD or RFPW
+		consistent with the rest of the world or if multiple wikiStates then consistent with that specific wikiState.
+	}
+	
+	/** returns null (or should it throw Bull.instance?) if spend isnt enough.
+	FIXME it needs to return how much was left unspent. Maybe this should return long,
+	then call another func like E() which only returns λ if the return value is cached like in SimpleFn.cacheAnyRet.
+	*/
+	public λ e(long maxSpend){
+		
+	}
+	
+	/** lazy lambda call, always halts instantly, basically just create or find a binary forest node
+	where this is its l() and param is its r(), that if you call eval() on returns what (this param) evals to,
+	same as this.e(param).
+	*/
+	public λ f(λ param);
+	
+	/** eager (nonlazy) lambda call. Same as this.f(param).e(). */
+	public default λ e(λ param){
+		//TODO make sure Compiled does the get() automatically if !compiled().on(): return compiled().get().apply(this,param);
+		return compiled().apply(this,param);
+	}
+	
+	/** UnaryOperator<λ> */
+	public default λ apply(λ param){
+		return e(param);
+	}
+	
+	/** lazy. key aka normedId is id with the header part ANDED with HeaderBits.keyMask
+	to view all mutable TruthValues in header as TruthValue.unknown.
+	Id includes newest header bits (a bloomFilter accumulating TruthValues of yes or no or bull)
+	and is a godel-number-like-statement and is self contained in that
+	if you receive a set of them, they are a valid system state or part of the system state
+	such as they might claim that (fibonacci 23) returns "orange juice",
+	which is not true but it can still claim it, and bull would occur if that is
+	combined with any claim th at (fibonacci 23) returns something else,
+	and by turing-complete-challenge-responsing eachother across peer to peer network,
+	we will hopefully converge toward truth and the lack of bull.
+	*/
+	public default Word idKey(){
+		TODO
+	}
+	
+	/** lazy. see comment of idKey(). This is a godel-number-like-statement. */
+	public default Word idKeyVal(){
+		"TODO return idKey but with one of the longs replaced by header.""
+	}
+	
+	/** 32 TruthValues (high 32 bits are the YES parts, low 32 bits are NO parts) described in HeaderBits */
 	public long header();
 	
 	/** modifies header by ORing it with oreq, as its made of TruthValues of 2 bits each. */
@@ -76,18 +140,6 @@ public strictfp interface λ extends UnaryOperator<λ>, /*Blob,*/ ob{
 		//return g(0b110L); is that right? reverse the high/low bit order (excluding the highest 1 bit) or not?
 	}
 	
-	
-	
-	public default λ e(λ param){
-		//TODO make sure Compiled does the get() automatically if !compiled().on(): return compiled().get().apply(this,param);
-		return compiled().apply(this,param);
-	}
-	
-	/** UnaryOperator<λ> */
-	public default λ apply(λ param){
-		return e(param);
-	}
-	
 	/** You can check if this is u or not (the node which all binary forest paths lead to)
 	as it is 2 specific byte values (depending if isDirty vs !isDirty in the highest bit in that byte).
 	Everything else in this byte (the low 7 bits) are cache, including to check if it is halted or not,
@@ -136,15 +188,17 @@ public strictfp interface λ extends UnaryOperator<λ>, /*Blob,*/ ob{
 	*/
 	public byte op();
 	
-	public default boolean isLeaf(){
+	public default TruthValue isLeaf(){
 		return opIsLeaf(op());
 	}
 	
-	public default boolean isDirty(){
+	FIXME this should be !HeaderBits.isDeterministic.
+	public default TruthValue isDirty(){
+		HeaderBits.isDeterministic
 		return opIsDirty(op());
 	}
 	
-	public default boolean isHalted(){
+	public default TruthValue isHalted(){
 		return opIsHalted(op());
 	}
 	

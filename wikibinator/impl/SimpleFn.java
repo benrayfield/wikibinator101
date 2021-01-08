@@ -1,6 +1,8 @@
 /** Ben F Rayfield offers this software opensource MIT license */
 package wikibinator.impl;
 import static wikibinator.impl.ImportStatic.*;
+
+import java.lang.ref.SoftReference;
 //import static wikibinator.fn.*;
 //import static wikibinator.impl.Cache.*;
 import java.util.function.Supplier;
@@ -11,7 +13,53 @@ import wikibinator.λ;
 
 public class SimpleFn implements λ{
 	
-	public final byte op;
+	/** The purpose of SoftReference is for JVM to decide when to garbcol things
+	based on how much memory is available as its defined as a cache. Nondeterministic things in
+	wikiState will need something more than this since they cant be derived again without at
+	least some parts of that. On the other hand, deterministic things can all be derived only from λ
+	so are all cache. The deterministic functions, which you can build a whole universe with, is 100% cache.
+	Theres nothing other than cache in such a virtual world.
+	<br><br>
+	Its called cacheAnyRet instead of cacheRet cuz dedup is lazy and in case the math axioms
+	are not used correctly or some peer in network is trusted that shouldnt have, which leads to bull
+	or may lead to bull later, but before that, multiple return values, that are not the same forest shape,
+	could happen, but will never happen in the correct use of the system,
+	so until that converges, this "cuts you some slack" in returning "any" of those return values
+	even though in the perfect math axioms theres only 1 return value, which it converges toward.
+	<br><br>
+	FIXME I wrote the below paragraph wrong. The parent knows its 2 childs eval to the same thing,
+	but the SoftReference<λ> goes in parent.l and points at parent.r,
+	so the parent tells parent.l about parent.r. TODO fix the below text.
+	When any λ parent has !parent.l.isHalted and parent.r.isHalted
+	and parent.returnValOfLeftChildEqualsReturnValOfRightChild
+	THEN can set parent.cacheAnyRet = new SoftReference(parent.r),
+	which is a RFPD cache aka return func param isDeterministic,
+	so when someone wants to compute (x y), then create a new (x y) and dedup or partialDedup it,
+	which finds that parent aka is that (x y) and looks in (x y).cacheAnyRet.get()
+	(and dont forget to check if the SoftReference is null as you replace it for each value it is a soft reference to) 
+	and if that (x y).cacheAnyRet.get() returns a λ then thats the halted return value of (x y).
+	This is similar to occamsfuncer's CacheFuncParamReturn.java
+	which is a map of callquad to callquad aka fn.java to fn.java.
+	If (x y).cacheAnyRet==null or (x y).cacheAnyRet.get()==null THEN recurse to compute the return value
+	aka debugStepInto. If the SoftReference has it, thats a debugStepOver.
+	<br><br>
+	TODO theres probably faster ways to compute this than interacting directly with the java garbage collector
+	thru SoftReference, such as using UndoMem and Bloom and lwjgl opencl and javassist etc,
+	but this is an ok way to prototype wikibinator and maybe will be efficient enough longterm for interpreted mode.
+	*/
+	protected SoftReference<λ> cacheAnyRet;
+	
+	//public final byte op;
+	
+	/** the 32 TruthValues (2 bits each) described in HeaderBits.
+	The YES parts are in high 32 bits, NO parts in low 32 bits.
+	Axioms read long header in many binary forest nodes (λ's) and derive new TruthValues
+	and OR those into various λ.header without ever causing TruthValue.bull (simultaneous YES and NO)
+	except if that does happen then it proves the math was computed wrong so
+	backtrack andOr try it in various other combos to find what went wrong and proceed
+	without any BULL. Bull occurs when (((int)(header>>32))&(int)header)!=0 aka HeaderBits.hasAnyBull(long).
+	*/
+	protected long header;
 	
 	public final λ func, param;
 	

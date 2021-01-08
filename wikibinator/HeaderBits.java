@@ -45,29 +45,6 @@ so it would probably recover or with some slight adjustments to the VM
 or especially a bunch of compatible opensource forks of the VM working together in realtime in p2p networks.
 */
 public enum HeaderBits{
-	
-	/** If isDeterministic then wikiState == (lazig (S I I) (S I I))
-	which is a lambda that infloops for every possible param.
-	If not isDeterministic then lambdaState is some possible function that
-	is probably not completely defined as it will be defined by the accumulation of
-	RFPDs aka <returnValue func param isDeterministic>
-	or RFPWs aka <returnValue func param wikiState> where wikiState may be a specific lambda
-	or may be a salt (isSalt) whose child pointers are made of TruthValue.unknown
-	and it will probably never be known exactly what function the wikiState is
-	or if theres many or just 1 of them, depending if they all fit together consistently or not.
-	The main nondeterministic WikiState is defined by many peoples and computers
-	shared beliefs about it in the form of basically <returnValue func param aSymbolRepresentingTheUniverse>,
-	though in the far more expensive math of Verse.java which is many <ret func param wikiState>-->TruthValue,
-	sparse selections from all possible wikiStates are considered in many sparse combos
-	in how they may align to eachother. In practice we will probably have just 2 wikiStates
-	which are (lazig (S I I) (S I I)) and aSymbolRepresentingTheUniverse.
-	Its (lazig (S I I) (S I I)) if isDeterministic else its aSymbolRepresentingTheUniverse,
-	but I'm leaving that open for possible future expansion of considering multiple incompatible forks
-	of wikiState. aSymbolRepresentingTheUniverse aka theMainWikiState.
-	*/
-	isDeterministic(1, true),
-	
-	//FIXME should isDeterministic and isTheMainWikiState be part of the merkle forest?
 			
 	/** If !isDeterministic then either it is the main wiki state (aSymbolRepresentingTheUniverse)
 	or it is something related to "leaving that open for possible future expansion of considering
@@ -101,7 +78,7 @@ public enum HeaderBits{
 	Theres a syntax for pairs, like  (pair (pair T F) (pair T T)) is [[T F] T T] aka [[T F][T T]],
 	and if you want a linkedlist of a b c d e its [a b d d e λ] aka [a [b [d [d [e λ]]]]].
 	*/
-	isLiteral(1, true),
+	isLiteral_elseHash(1, true),
 	
 	/** An optimization of the call (L x).
 	I dont know about the header bits for this, if it should be self's header bits vs self.R's header bits,
@@ -157,21 +134,22 @@ public enum HeaderBits{
 	*/
 	hasCachekey(1, true),
 	
-	/** This is where to store the λ.op byte used in a switch statement in SimpleVM.interpretedMode,
-	and in optimizations of it such as lwjgl opencl GPU and javassist.
-	Self and this many curries viewed by λ.L().isLeaf() .. λ.L().L().L().L().L().L().isLeaf().
-	Knowing that allows recursing less deep to know what opcode to do.
-	<br><br>
-	Usually you can only know x.isLeaf or !x.isLeaf if x.isHalted.
-	*/
-	curriesAreLeaf(7, true),
-	
 	/** If true, then there are more digits of the height integer than fits in lowBitsOfHeight */
 	isHigher(1, true),
 	
 	/** If !isHigher then this is all bits of the unsigned height integer, else this is only the low n bits of it.
 	TODO should this be ignored (set to its max value?) if isHigher since it
 	might make it harder to compute without having to know how deep you are?
+	This may bits of height allows it to describe that a cbt has 1 bit, 2 bits .. 2^61 bits (about 2 exabits),
+	todo is that offby1 aka 2^60 bits 2^59 bits? verify the exact number, but somewhere around 1 exabit.
+	It doesnt store the exact bit length of the cbtBitstring, just the powOf2 it fits in
+	(and it might be smaller than that powOf2 such as if the right child is all 0s).
+	If you want to know the long size in bits (bize) of it, use RFPD cache
+	<(bize aBitstring) 1152921504606846976L> aka the claim that (bize aBitstring) returns the cbt64
+	returned by (baseTenToSignedCbt64 "1152921504606846976") but thats just a way to display
+	numbers in baseTen depending on some syntax or another which will also be derived by combos of λ,
+	where bize and baseTenToSignedCbt64 would be functions derived from combos of λ
+	then optimized using Compiled.java as in λ.getCompiled() and λ.setCompiled(Compiled).
 	*/
 	lowBitsOfHeight(7, true),
 	
@@ -211,6 +189,10 @@ public enum HeaderBits{
 	All things which do not halt equal (S I I (S I I)) by returnValOfLeftChildEqualsReturnValOfRightChild
 	aka <m (S I I (S I I))>.returnValOfLeftChildEqualsReturnValOfRightChild is TruthValue.yes
 	if !m.willHalt, or they could all be TruthValue.unknown.
+	<br><br>
+	x.isHalted implies x.willHalt. x.willHalt does not imply x.isHalted
+	since it would halt by returning some node other than x.
+	We know its not x cuz what it returns isHalted and !x.isHalted.
 	*/
 	willHalt(1, false),
 	
@@ -240,7 +222,49 @@ public enum HeaderBits{
 	This is not the same as returnValOfLeftChildEqualsReturnValOfRightChild kind of equality
 	which is equality of the forest shape of what each child returns (or returns itself if child isHalted).
 	*/
-	leftAndRightForestShapesEqual(1, false);
+	leftAndRightForestShapesEqual(1, false),
+	
+	/** isNondeterministic concat curriesAreLeaf together are the λ.op byte used in switch statement
+	in SimpleFn.interpretedMode, and TODO in optimizations of it such as lwjgl opencl GPU and javassist.
+	Changed this to isNondeterministic so the first 128 ops are deterministic, second 128 ops nondeterministic.
+	If isDeterministic then wikiState == (lazig (S I I) (S I I))
+	which is a lambda that infloops for every possible param.
+	If not isDeterministic then lambdaState is some possible function that
+	is probably not completely defined as it will be defined by the accumulation of
+	RFPDs aka <returnValue func param isDeterministic>
+	or RFPWs aka <returnValue func param wikiState> where wikiState may be a specific lambda
+	or may be a salt (isSalt) whose child pointers are made of TruthValue.unknown
+	and it will probably never be known exactly what function the wikiState is
+	or if theres many or just 1 of them, depending if they all fit together consistently or not.
+	The main nondeterministic WikiState is defined by many peoples and computers
+	shared beliefs about it in the form of basically <returnValue func param aSymbolRepresentingTheUniverse>,
+	though in the far more expensive math of Verse.java which is many <ret func param wikiState>-->TruthValue,
+	sparse selections from all possible wikiStates are considered in many sparse combos
+	in how they may align to eachother. In practice we will probably have just 2 wikiStates
+	which are (lazig (S I I) (S I I)) and aSymbolRepresentingTheUniverse.
+	Its (lazig (S I I) (S I I)) if isDeterministic else its aSymbolRepresentingTheUniverse,
+	but I'm leaving that open for possible future expansion of considering multiple incompatible forks
+	of wikiState. aSymbolRepresentingTheUniverse aka theMainWikiState.
+	*/
+	isNondeterministic(1, true),
+	//TODO rename it back to isDeterministic and flip the TruthValue? Cuz its shorter to say,
+	//but I also like determinism being sorted first.
+	//Either way, the λ.op byte is (byte)(header>>>32)... wait.. do I want the YES section to be the low bits
+	//so that will be just (byte)header? Still have to verify theres 8 1s in those 16 bits in the 8 TruthValues,
+	//but that would normally be verified when the node is created as its part of merkle forest (key, not val),
+	//even though it could be part of val since it can be derived from the forest shape, but make it part of key
+	//as an optimization.
+	
+	/** isNondeterministic concat curriesAreLeaf together are the λ.op byte used in switch statement
+	in SimpleFn.interpretedMode, and TODO in optimizations of it such as lwjgl opencl GPU and javassist.
+	Self and (this many - 1) curries viewed by self.isLeaf() .. self.L().L().L().L().L().L().isLeaf().
+	Each next parent just bit shifts this part of the header long and ORs in itself (which is not leaf
+	unless its 2 childs are identityFunc and leaf which are the 2 childs of leaf to "close the loop").
+	Knowing that allows recursing less deep to know what opcode to do.
+	<br><br>
+	Usually you can only know x.isLeaf or !x.isLeaf if x.isHalted.
+	*/
+	curriesAreLeaf(7, true);
 	
 	/** number of 2-bit TruthValues */
 	public final int tvs;
@@ -296,7 +320,7 @@ public enum HeaderBits{
 	
 	/** header is 32 TruthValues. Returns true iff any of them are TruthValue.bull */
 	public static boolean hasAnyBull(long header){
-		return ((int)(header>>32)&(int)header)!=0;
+		return (((int)(header>>32))&(int)header)!=0;
 	}
 	
 	HeaderBits(int tvs, boolean isPartOfMerkleForest){

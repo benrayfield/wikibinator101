@@ -2,7 +2,9 @@
 package wikibinator.impl;
 import java.util.function.BinaryOperator;
 
-import wikibinator.*;
+import wikibinator.Compiled;
+import wikibinator.WikiState;
+import wikibinator.λ;
 
 public class ImportStatic{
 	
@@ -83,19 +85,93 @@ public class ImportStatic{
 	cacheByte with isForceDeterminism as high bit, and the low 7 bits are the cache.\
 	But more likely isForceDeterminism is not part of node itself but is part of NondetNode???
 	*/
+	
+	Theres already 32 opcodes in the 6 params of the universalFunc, as the first 5 params each being leaf vs nonleaf.
+	UPDATE: actually 64 opcodes by counting the isDeterministic bit in header (TODO put that beside the 7 curryLeaf
+	bits aka the byte op, so its actually 8 adjacent bits a byte, which is actually 16 bits in 2 places as 8 TruthValues).
+	UPDATE: actually theres around 128 (126?) opcodes cuz of counting there being 0..6 curries like binheap indexing,
+	and if we count the last param its back to 256... This was an optimization I was already planning,
+	but it helps to explain it as fewer categories of opcodes branching from each of 0..6 params
+	being leaf vs anyNonleaf vs isLastParam.
+	...
+	TODO 32 opcodes (some of which are duplicates, especially to put T and F 4 deep and typeval is 3 deep,
+	so the byte opcode (which knows leaf vs nonleaf) can identify if something is the typeval symbol,
+	if something is (typeval x), vs if something is (typeval x y).
+	So the typeval semantic, unlike the text I wrote about it being at user level near here,
+	is at the universal function level, but what the types mean (other than acting exactly like the pair func)
+	is still decided at user level. Its just a pair of 2 pieces of data (functions are data)
+	implying "the typeval semantic" mostly for display and helping to organize many existing semantics on the internet,
+	a place such things could be hooked in and evolved together.
+	Make the third param (if first 2 params are something) decide if its pair vs typeval
+	so we can say the third param is the isSemantic bit (after 2 other params being leaf vs nonleaf each),
+	and regardless of isSemantic vs !isSemantic, it computes the church pair lambda aka λx.λy.λz.zxy,
+	and as a pair or typeval its only curried x and y so doesnt do that yet.
+	/*
 	public static final byte
-		opWiki = 0, //1
+	
+		FIXME, whichever of these typeval goes in has to be an odd number,
+		and I might want to to go in pair,
+		such as op5 is (λ (λ λ) λ (λ λ)) and if pair was changed to be op5
+		then could use (λ (λ λ) λ (λ (λ λ))) as typeval aka (λ (λ λ) λ (λ (λ λ)) "image/jpeg" ...thebytes...)
+		which would still technically be a pair lambda since (λ (λ λ)) is not leaf,
+		and the ops are chosen by the first 3 params being either leaf or any nonleaf,
+		but by L and R etc can check if third param is (λ (λ λ)), or maybe just make it be "typeval",
+		so could derive an isTypeval func that can tell the difference between a normal pair and a typeval pair.
+		Typeval is needed for a bunch of existing stuff on the internet to fit in
+		without being displayed as raw bits, such as string would have a typeval, and double would have a typeval,
+		and double[] would have a typeval... It doesnt change anything except that certain funcs
+		might be designed to look for that datastruct. Its still exactly described by the universal func math.
+		Its something you can build using that math.
+		...
+		Or maybe just put "double[]" in that third param, since any "type" other than λ and (λ λ) would work,
+		as (λ λ) is normally whats used for the "anything except leaf".
+		...
+		Ive moved opPair to be op 1 (of 0..7) so its an odd number.
+		TODO update the newest *.λ example code which derives op0..op7, but other places are using these constants.
+		...
+		Example typeval:     (λ λ λ "typeval" "image/jpeg" thebytes)
+		Example normal pair: (λ λ λ (λ λ) "image/jpeg" thebytes)
+		WAIT... If Im putting the symbol for typeval in third param then I dont need it to go in pair.
+		Could just use T.l or F.l aka T or F with 1 less param, and put the param there
+		(λ takes 6 params, 3 of which choose op and 3 are the params of that op, but not every op needs all 3 params).
+		Its not something that has to be decided before building it, since its derived as user level code
+		and anyone who doesnt like it can just not use those functions and derive their own functions to use instead
+		and share those across the internet and get a bunch of other people to use it with them
+		and obsolete the kind of typeval I define here.
+		But you cant easily do that for the universal function of 6 params,
+		at least not without breaking compatibility.
+		...
+		Or could use (λ "image/jpeg" thebytes) as such a typeval, since anything with less than 6 params is halted.
+		We could view anything other than (λ (λ λ)) and (λ λ) that has 2 params as a typeval,
+		and the type would be anything other than λ and (λ λ). You could have functions in the type,
+		such as x is type y if (y x)->T or if (y x) halts would be another semantic (instead of halting on T or F).
+		I put the 8 ops back as their old order. It doesnt really matter what order they are
+		as long as its constant, and changing a single bit to swap between T and F is important.
+		But... do I want a typeval symbol like (λ "typeval" "image/jpeg" thebytes),
+		or just to be able to say things like (λ "image/jpeg" thebytes)?
+		A typeval symbol is useful in that it implies you should display its first param as a string
+		if its first param is a bitstring. For binary, could use deeper datastructs than just a string.
+		
+		TODO merge T and FI since they both only take 2 params,
+		giving space for Typeval to be 1 of the 8 opcodes.
+		Make typeval and pair do the same thing except differ by 1 opcode bit, similar to T and F differ by 1 bit.
+		Theres actually 32 opcodes, some of which are duplicates, depending on if the first 5 (of 6) params are leaf vs anything other than leaf,
+		so just put that in the switch statement.
+		Typeval will be 1 of them, a duplicate of Pair but with a semantic that means it should be viewed as a type and value of some kind.
+		
+		
+		opWiki = 0; //1
 		opS = 1, //3
 		opT = 2, //2
 		opFI = 3, //2
-		opPair = 4, //3
-		opSecondLastInList = 5, //1
+		opSecondLastInList = 4, //1
+		opPair = 5, //3
 		opCurry = 6, //3
 		opReflect = 7; //L 1, R 1, IsLeaf 1.
 			//Have 1 more space coult put a 1 param func,
 			//but 6 params is simpler than 5 cuz would squash them together too tightly.
 			//Keep it as 6 params. Its maybe the best possible digital universal function, either that or is very close to it.
-	
+	*/
 	
 	/** TODO derive a fn which computes getComment instead of hardcoding it here */
 	public static λ getComment(λ anyVarargLambda){
