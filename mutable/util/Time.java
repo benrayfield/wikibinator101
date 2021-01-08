@@ -45,7 +45,7 @@ public class Time{
 	TODO test it again on newer computers.
 	*/
 	public static double now(){
-		return nowNano()*1e-9;
+		return utcnano()*1e-9;
 		/*
 		//TODO optimize by caching the 2 start numbers into 1 double
 		long nanoDiff = System.nanoTime()-startNano;
@@ -56,7 +56,7 @@ public class Time{
 	private static long lastTimeId = Long.MIN_VALUE;
 	
 	/** nowNano()/1e9 means the same time as (double)now(), except roundoff and lag */
-	public static long nowNano(){
+	public static long utcnano(){
 		return nanoOffset+System.nanoTime();
 	}
 	
@@ -66,7 +66,7 @@ public class Time{
 	*/
 	public static synchronized long timeId(){
 		//long utcNanoseconds = System.nanoTime()-startNano;
-		return lastTimeId = Math.max(lastTimeId+1, nowNano());
+		return lastTimeId = Math.max(lastTimeId+1, utcnano());
 	}
 	
 	/** returns the last in a block of timeIds.

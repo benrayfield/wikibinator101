@@ -7,6 +7,8 @@ import java.lang.ref.SoftReference;
 //import static wikibinator.impl.Cache.*;
 import java.util.function.Supplier;
 
+import javax.print.attribute.standard.MediaSize.Other;
+
 import wikibinator.Compiled;
 import wikibinator.WikiState;
 import wikibinator.λ;
@@ -46,8 +48,36 @@ public class SimpleFn implements λ{
 	TODO theres probably faster ways to compute this than interacting directly with the java garbage collector
 	thru SoftReference, such as using UndoMem and Bloom and lwjgl opencl and javassist etc,
 	but this is an ok way to prototype wikibinator and maybe will be efficient enough longterm for interpreted mode.
+	<br><br>
+	WARNING might have to use leastRecentlyUsed caching instead of using SoftReference cuz...
+	https://blog.shiftleft.io/understanding-jvm-soft-references-for-great-good-and-building-a-cache-244a4f7bb85d
+	QUOTE
+		1. don’t trust the javadoc:
+		All soft references to softly-reachable objects are guaranteed to have been freed before the virtual machine throws an OutOfMemoryError		
+		That’s a lie. It was true when soft references were first introduced in java 1.2, but from java 1.3.1 the jvm property -XX:SoftRefLRUPolicyMSPerMB was introduced. It defaults to 1000 (milliseconds), meaning that if there’s only 10MB available heap, the garbage collector will free references that have been used more than 10s ago. I.e. everything else will not be freed, leading to an OutOfMemoryError, breaking the guarantee from the javadoc (I’ll try to get that changed).
+		No problem, let’s just set it to -XX:SoftRefLRUPolicyMSPerMB=0 and the javadoc is suddenly true again.
+	UNQUOTE.
+	Also, least recently used will probably be more efficient.
 	*/
 	protected SoftReference<λ> cacheAnyRet;
+	TODO test SoftReference caching does it work reliably (not run out of memory ever)
+	AND benchmark it against leastRecentlyUsed [map of λ nonhalted -> λ halted] cache.
+	Created ReturnFuncParamCache class for that. Will need some class like CacheFuncParamReturn.java in occamsfuncer,
+	a map of λ nonhaltedCall to ReturnFuncParamCache, or something like that.
+	...
+	FIXME consider replacing ReturnFuncParamCache with the "parent" in comments of cacheAnyRet,
+	so CacheFuncParamReturn.java would have a map of λ x to λ parent where parent.l==x and parent.r is what x evals to,
+	so SimpleFn. would have a mutable long thats the same as ReturnFuncParamCache.timeLastUsed.
+	
+	see the comments around cacheAnyRet, where this is the "parent" and this is like CacheFuncParamReturn.
+	This will be garbcolable (garbage collectible) if its the leastRecentlyUsed one thats
+	not reachable by any Other λ thru its λ.l and λ.r child pointers deeply.
+	If x can reach y and x is not going to be garbcoled now, then neither will y be garbcoled,
+	but many λ will be kept only as cache of for example what (x z) or (y z) or (y x) etc returns,
+	and those will become garbcolable in order of leastRecentlyUsed.
+	So put the touch() func in λ.java interface and the e() func andOr e(long maxSpend)
+	funcs will automatically call touch.
+	protected long timeLastUsed;
 	
 	//public final byte op;
 	
