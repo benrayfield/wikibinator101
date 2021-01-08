@@ -22,20 +22,20 @@ maybe with a little neuralnets, bayesnets, and other optimizations used where th
 public enum TruthValue{
 	
 	/** 10 */
-	yes(1.,0.),
+	yes(true,false),
 	
 	/** 01 */
-	no(0.,1.),
+	no(false,true),
 	
 	/** 00, usually sparsely stored by not storing it at all, the default value for anything no statement is claimed about. */
-	unknown(0.,0.),
+	unknown(false,false),
 	
 	/** 11 (simultaneous yes and no) disproofByContradiction.
 	There are no set of non-bull statements which together generate bull.
 	<br><br>
 	Superposition is not bull since a nondeterministic turing machine can be emulated by a deterministic turing machine, for example.
 	*/
-	bull(1.,1.);
+	bull(true,true);
 
 	public TruthValue join(TruthValue x){
 		switch(x){
@@ -54,11 +54,12 @@ public enum TruthValue{
 		}
 	}
 	
-	public final double certaintyOfYes, certaintyOfNo;
+	//public final double certaintyOfYes, certaintyOfNo;
+	public final boolean y, n;
 	
-	private TruthValue(double certaintyOfYes, double certaintyOfNo){
-		this.certaintyOfYes = certaintyOfYes;
-		this.certaintyOfNo = certaintyOfNo;
+	private TruthValue(boolean certaintyOfYes, boolean certaintyOfNo){
+		this.y = certaintyOfYes;
+		this.n = certaintyOfNo;
 	}
 
 }

@@ -6,6 +6,11 @@ import wikibinator.Compiled;
 
 public strictfp interface λ extends UnaryOperator<λ>, /*Blob,*/ ob{
 	
+	public long header();
+	
+	/** modifies header by ORing it with oreq, as its made of TruthValues of 2 bits each. */
+	public void headerOreq(long oreq);
+	
 	/*TODO use binheap indexing to do what Blob does for a linear range, instead of implementing Blob?
 	Im thinking of storing the first n bits in each cbt in all higher binary forest nodes,
 	which would mean those n bits, an optimization specialized in cbts (pair of pair of pair... of T vs F).

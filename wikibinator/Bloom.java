@@ -22,7 +22,7 @@ but it will actually be stored in sparse combos of primitive arrays.
 */
 public interface Bloom{
 	
-	TODO no nondeterminism for now, and just get debugStepInto and debugStepOver working in bloom, of wikibinator
+	/*TODO no nondeterminism for now, and just get debugStepInto and debugStepOver working in bloom, of wikibinator
 	(aka where wikiState is (lazig (S I I) (S I I)))?
 	Just the ability for many people and computers to share <return func param> (RFP) cache would be big progress.
 	TODO need the ability to replace java etc's == operator with just viewing the TruthValues in self's childs recursively
@@ -35,14 +35,17 @@ public interface Bloom{
 	and wherever its output integer, copy that binary forest node to those 0 or more places within the n depth,
 	then OR the TruthValues with eachother, and it better NEVER derive any TruthValue.bull.
 	??? Is that what I want?
+	*/
 	
 	
 	
-	FIXME... it shouldnt need to know this at the VM level. I'll put in optimizations
+	/*FIXME... it shouldnt need to know this at the VM level. I'll put in optimizations
 	to put in solid blocks of 1s and 0s if needed, or whatever datastruct, nomatter how big it makes it,
 	but the core has to be simple. You should be able to pair any node with any node and generate a
 	SPECIFIC yes/1 or no/0 from it (even if it costs infinite compute time and memory to do so).
 	Fortunately the universe is infinite, but before such possibilities are explored, compiled to CPUs and GPUs.
+	*/
+	
 	/** Axioms are only called on EVEN bloom nodes (FIXME or should it be only ODD... would work either way but must choose one design),
 	which can of course act on ODD bloom nodes by looking 1 deeper within
 	the behaviors of the axiom. An example of an axiom is to look in 2 certain position relative to self node
@@ -66,19 +69,73 @@ public interface Bloom{
 	it would be unable to prove that since all nodes start as TruthValue.unknown.
 	Just alternate isEven at each next depth. Dont need to store it except maybe to have 2 subclasses of Bloom
 	or a final boolean var in them.
-	*/
+	*
 	public boolean odd();
+	*/
 	
 	public TruthValue v();
 	
 	/** 31 TruthValues in a long, as binheapIndexing of 1 2 4 8 16 TruthValues at depths 0..4 */
-	public long v31();
+	public default long v4(){
+		//TODO optimize theres some overlap between v1 v3 v7 v15 and v31. wont break anything but is inefficient.
+		return (v3()<<32)|(l().v3()<<16)|r().v3();
+	}
+	
+	public default long v3(){
+		//TODO optimize theres some overlap between v1 v3 v7 v15 and v31. wont break anything but is inefficient.
+		return (v2()<<16)|(l().v2()<<8)|r().v2();
+	}
+	
+	public default long v2(){
+		//TODO optimize theres some overlap between v1 v3 v7 v15 and v31. wont break anything but is inefficient.
+		return (v1()<<8)|(l().v1()<<4)|r().v1();
+	}
+	
+	public default long v1(){
+		//TODO optimize theres some overlap between v1 v3 v7 v15 and v31. wont break anything but is inefficient.
+		return (v0()<<4)|(l().v0()<<2)|r().v0();
+	}
+	
+	public default long v0(){
+		//TODO optimize theres some overlap between v1 v3 v7 v15 and v31. wont break anything but is inefficient.
+		switch(v()){
+		case unknown: return 0L;
+		case no: return 1L;
+		case yes: return 2L;
+		case bull: return 3L;
+		default: throw new RuntimeException("This cant happen, but java doesnt know that.");
+		}
+	}
 	
 	/** get to depth n, where the last 4 depth are a v31(). Returns long[1<<(n-4)] FIXME is that offby1. */
-	public long[] vn(int n);
-	TODO do i want a data format where half of a long is a binheapIndex and the other half is a v15 (which can store a byte)?
+	public default long[] vn(int n){
+		if(n <= 4){
+			switch(n){
+			case 0: return new long[]{v0()};
+			case 1: return new long[]{v1()};
+			case 2: return new long[]{v2()};
+			case 3: return new long[]{v3()};
+			case 4: return new long[]{v4()};
+			default: throw new RuntimeException("n="+n);
+			}
+		}
+		long[] ret = new long[1<<(n-4)];
+		vn_internal(this, ret, 1, n);
+		return ret;
+	}
+	
+	static void vn_internal(Bloom b, long[] ret, int i, int recurse){
+		if(recurse > 0){
+			vn_internal(b.l(), ret, i*2, recurse-1);
+			vn_internal(b.r(), ret, i*2+1, recurse-1);
+		}
+		ret[i] = b.v4();
+	}
+	
+	/*TODO do i want a data format where half of a long is a binheapIndex and the other half is a v15 (which can store a byte)?
 	In that way, each long could put 15 TruthValues (its 8 deepest could be the bits of a byte) in a space of around a gigabyte.
 	Or 2 longs could put an int16 somewhere in an exabyte space.
+	*/
 	
 	
 	
@@ -141,3 +198,4 @@ public interface Bloom{
 
 
 }
+

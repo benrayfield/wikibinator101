@@ -40,4 +40,12 @@ public class SlowBloom implements Bloom{
 		throw new RuntimeException("TODO");
 	}
 
+	public long[] vn(int n){
+		throw new RuntimeException("TODO");
+	}
+
+	public Bloom p(Bloom b){
+		throw new RuntimeException("TODO");
+	}
+
 }
