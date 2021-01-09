@@ -57,5 +57,22 @@ public class Text{
 		}
 		throw new Error("Not a hex digit: (baseTen)"+d);
 	}
+	
+	public static String byteTo8Chars(byte b){
+		//TODO optimize
+		return intTo32Chars(b&0xff).substring(24);
+	}
+	
+	public static String intTo32Chars(int i){
+		//TODO optimize
+		String s = "0000000000000000000000000000000"+Integer.toUnsignedString(i, 2);
+		return s.substring(s.length()-32);
+	}
+	
+	public static String longTo64Chars(long j){
+		//TODO optimize
+		String s = "000000000000000000000000000000000000000000000000000000000000000"+Long.toUnsignedString(j, 2);
+		return s.substring(s.length()-64);
+	}
 
 }

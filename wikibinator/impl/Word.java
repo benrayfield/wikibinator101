@@ -49,6 +49,21 @@ public final class Word implements Comparable<Word>/*, λ*/{
 		d = Long.parseUnsignedLong(s.substring(49,65),16);
 	}
 	
+	/** read a range of 32 bytes */
+	public Word(byte[] b, int offset){
+		this(
+			MathUtil.readLongFromByteArray(b, offset),
+			MathUtil.readLongFromByteArray(b, offset+8),
+			MathUtil.readLongFromByteArray(b, offset+16),
+			MathUtil.readLongFromByteArray(b, offset+24)
+		);
+	}
+	
+	/** 32 bytes */
+	public Word(byte[] b){
+		this(b, 0);
+	}
+	
 	public Word(long a, long b, long c, long d){
 		this.a = a;
 		this.b = b;

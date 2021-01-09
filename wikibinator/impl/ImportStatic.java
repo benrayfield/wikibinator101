@@ -107,14 +107,13 @@ public class ImportStatic{
 	and regardless of isSemantic vs !isSemantic, it computes the church pair lambda aka λx.λy.λz.zxy,
 	and as a pair or typeval its only curried x and y so doesnt do that yet.
 	/*
-	public static final byte
 	
 		FIXME, whichever of these typeval goes in has to be an odd number,
 		and I might want to to go in pair,
 		such as op5 is (λ (λ λ) λ (λ λ)) and if pair was changed to be op5
 		then could use (λ (λ λ) λ (λ (λ λ))) as typeval aka (λ (λ λ) λ (λ (λ λ)) "image/jpeg" ...thebytes...)
 		which would still technically be a pair lambda since (λ (λ λ)) is not leaf,
-		and the ops are chosen by the first 3 params being either leaf or any nonleaf,
+		and the opReflect are chosen by the first 3 params being either leaf or any nonleaf,
 		but by L and R etc can check if third param is (λ (λ λ)), or maybe just make it be "typeval",
 		so could derive an isTypeval func that can tell the difference between a normal pair and a typeval pair.
 		Typeval is needed for a bunch of existing stuff on the internet to fit in
@@ -145,7 +144,7 @@ public class ImportStatic{
 		We could view anything other than (λ (λ λ)) and (λ λ) that has 2 params as a typeval,
 		and the type would be anything other than λ and (λ λ). You could have functions in the type,
 		such as x is type y if (y x)->T or if (y x) halts would be another semantic (instead of halting on T or F).
-		I put the 8 ops back as their old order. It doesnt really matter what order they are
+		I put the 8 opReflect back as their old order. It doesnt really matter what order they are
 		as long as its constant, and changing a single bit to swap between T and F is important.
 		But... do I want a typeval symbol like (λ "typeval" "image/jpeg" thebytes),
 		or just to be able to say things like (λ "image/jpeg" thebytes)?
@@ -158,20 +157,31 @@ public class ImportStatic{
 		Theres actually 32 opcodes, some of which are duplicates, depending on if the first 5 (of 6) params are leaf vs anything other than leaf,
 		so just put that in the switch statement.
 		Typeval will be 1 of them, a duplicate of Pair but with a semantic that means it should be viewed as a type and value of some kind.
-		
-		
-		opWiki = 0; //1
-		opS = 1, //3
-		opT = 2, //2
-		opFI = 3, //2
-		opSecondLastInList = 4, //1
-		opPair = 5, //3
-		opCurry = 6, //3
-		opReflect = 7; //L 1, R 1, IsLeaf 1.
-			//Have 1 more space coult put a 1 param func,
-			//but 6 params is simpler than 5 cuz would squash them together too tightly.
-			//Keep it as 6 params. Its maybe the best possible digital universal function, either that or is very close to it.
-	*/
+	*/	
+
+	public static final byte
+		opWiki = 0, //1. TODO for possible future expansion? theres space to put 3 more unary ops here, or 1 more that takes 2 params and 1 more unary.
+		opReflect = 1; //3: L 1, R 1, IsLeaf 1, isDeterministic 1.
+		opTFI = 2, //3
+		opS = 3, //3
+		opTypeval = 4, //3, same as opPair except the semantic
+		opPair = 5; //3
+		opSecondLastInList = 6, //1. TODO for possible future expansion? theres space to put 3 more unary ops here, or 1 more that takes 2 params and 1 more unary.
+		opCurry = 7, //3
+			
+			
+		//Have 1 more space coult put a 1 param func,
+		//but 6 params is simpler than 5 cuz would squash them together too tightly.
+		//Keep it as 6 params. Its maybe the best possible digital universal function, either that or is very close to it.
+	
+	public static final byte opWiki00=opWiki*4, opWiki01=opWiki*4+1, opWiki10=opWiki*4+2, opWiki11=opWiki*4+3;
+	public static final byte opS00=opS*4, opS01=opS*4+1, opS10=opS*4+2, opS11=opS*4+3;
+	public static final byte opTFI00=opTFI*4, opTFI01=opTFI*4+1, opTFI10=opTFI*4+2, opTFI11=opTFI*4+3;
+	public static final byte opSecondLastInList00=opSecondLastInList*4, opSecondLastInList01=opSecondLastInList*4+1, opSecondLastInList10=opSecondLastInList*4+2, opSecondLastInList11=opSecondLastInList*4+3;
+	public static final byte opTypeval00=opTypeval*4, opTypeval01=opTypeval*4+1, opTypeval10=opTypeval*4+2, opTypeval11=opTypeval*4+3;
+	public static final byte opPair00=opPair*4, opPair01=opPair*4+1, opPair10=opPair*4+2, opPair11=opPair*4+3;
+	public static final byte opCurry00=opCurry*4, opCurry01=opCurry*4+1, opCurry10=opCurry*4+2, opCurry11=opCurry*4+3;
+	public static final byte opReflect00=opReflect*4, opReflect01=opReflect*4+1, opReflect10=opReflect*4+2, opReflect11=opReflect*4+3;
 	
 	/** TODO derive a fn which computes getComment instead of hardcoding it here */
 	public static λ getComment(λ anyVarargLambda){
@@ -272,7 +282,7 @@ public class ImportStatic{
 	and keeping track if which things are isDirty vs !isDirty,
 	where a binary forest node isDirty if it is the result of nondeterminism (which exists only in wiki function),
 	and if a !isDirty function tries to call wiki then it sees wiki as a function that
-	infinite loops for all possible params such as Lx.(S I I (S I I)) (todo write that without the Lx.
+	infinite loopReflect for all possible params such as Lx.(S I I (S I I)) (todo write that without the Lx.
 	and instead in terms of U/theUniversalFunc itself... I have a lazig somewhere
 	that takes 3 params and calls the first on the second ignoring the first, but waits for all 3,
 	so a deterministic function would see the wiki function as (lazig (S I I) (S I I)),
@@ -297,8 +307,8 @@ public class ImportStatic{
 	
 	/** Just a semantic, used for things like (typeval "image/jpeg" <bytesOfJpg>).
 	Todo put something other than u and (u u) in param 3 of 6, in pair? so its still a pair op
-	since the first 3 params (of u) are each either u or anything_except_u to choose between the 8 ops
-	which are each a lambda of 3 params (6 params of u), or some ops (Reflect) also uses params 4 and 5
+	since the first 3 params (of u) are each either u or anything_except_u to choose between the 8 opReflect
+	which are each a lambda of 3 params (6 params of u), or some opReflect (Reflect) also uses params 4 and 5
 	to choose between IsLeaf, L, and R, of the last param (6 of 6).
 	*/
 	public static final λ Typeval = null; //FIXME not null
@@ -309,6 +319,21 @@ public class ImportStatic{
 	
 	public static λ cpcp(λ func, λ param){
 		return Cache.cpcp(func, param);
+	}
+	
+	/** create long from high and low 32 bits */
+	public static long ii(int high, int low){
+		return (((long)high)<<32)|(low&0xffffffffL);
+	}
+	
+	/** high 32 bits of long */
+	public static int hi(long j){
+		return (int)(j>>32);
+	}
+	
+	/** low 32 bits of long */
+	public static int lo(long j){
+		return (int)j;
 	}
 
 }

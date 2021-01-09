@@ -817,5 +817,10 @@ public class MathUtil{
 		return b;
 	}
 	
+	public static byte[] longsToBytes(long... longs){
+		byte[] b = new byte[longs.length<<3];
+		for(int i=0; i<longs.length; i++) copyLongIntoByteArray(b, i<<3, longs[i]);
+		return b;
+	}
+	
 }
-

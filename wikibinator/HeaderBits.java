@@ -1,6 +1,13 @@
 package wikibinator;
 import static mutable.util.Lg.*;
+import static wikibinator.impl.ImportStatic.*; //FIXME this shouldnt be in spec. keep impl separate from this.
+import immutable.util.MathUtil;
+import immutable.util.Text;
 import immutable.util.TruthValue;
+import wikibinator.impl.Bull;
+import wikibinator.impl.NotAllYesOrNo;
+import wikibinator.impl.Unknown;
+import wikibinator.impl.Word;
 
 /** (long)λ.header() is made of TruthValues of 2 bits each,
 storing the YES bits in the high 32 bits of a long and the NO bits in the low 32 bits.
@@ -45,6 +52,55 @@ so it would probably recover or with some slight adjustments to the VM
 or especially a bunch of compatible opensource forks of the VM working together in realtime in p2p networks.
 */
 public enum HeaderBits{
+	
+	/** isNondeterministic concat curriesAreLeaf together are the λ.op byte used in switch statement
+	in SimpleFn.interpretedMode, and TODO in optimizations of it such as lwjgl opencl GPU and javassist.
+	Self and (this many - 1) curries viewed by self.isLeaf() .. self.L().L().L().L().L().L().isLeaf().
+	Each next parent just bit shifts this part of the header long and ORs in itself (which is not leaf
+	unless its 2 childs are identityFunc and leaf which are the 2 childs of leaf to "close the loop").
+	Knowing that allows recursing less deep to know what opcode to do.
+	<br><br>
+	Usually you can only know x.isLeaf or !x.isLeaf if x.isHalted.
+	*/
+	curriesAreLeaf(7, true),
+	
+	curriesAreLeaf_ignore6(0, false),
+	curriesAreLeaf_ignore5(0, false),
+	curriesAreLeaf_ignore4(0, false),
+	curriesAreLeaf_ignore3(0, false),
+	curriesAreLeaf_ignore2(0, false),
+	curriesAreLeaf_ignore1(0, false),
+	
+	/** isNondeterministic concat curriesAreLeaf together are the λ.op byte used in switch statement
+	in SimpleFn.interpretedMode, and TODO in optimizations of it such as lwjgl opencl GPU and javassist.
+	Changed this to isNondeterministic so the first 128 ops are deterministic, second 128 ops nondeterministic.
+	If isDeterministic then wikiState == (lazig (S I I) (S I I))
+	which is a lambda that infloops for every possible param.
+	If not isDeterministic then lambdaState is some possible function that
+	is probably not completely defined as it will be defined by the accumulation of
+	RFPDs aka <returnValue func param isDeterministic>
+	or RFPWs aka <returnValue func param wikiState> where wikiState may be a specific lambda
+	or may be a salt (isSalt) whose child pointers are made of TruthValue.unknown
+	and it will probably never be known exactly what function the wikiState is
+	or if theres many or just 1 of them, depending if they all fit together consistently or not.
+	The main nondeterministic WikiState is defined by many peoples and computers
+	shared beliefs about it in the form of basically <returnValue func param aSymbolRepresentingTheUniverse>,
+	though in the far more expensive math of Verse.java which is many <ret func param wikiState>-->TruthValue,
+	sparse selections from all possible wikiStates are considered in many sparse combos
+	in how they may align to eachother. In practice we will probably have just 2 wikiStates
+	which are (lazig (S I I) (S I I)) and aSymbolRepresentingTheUniverse.
+	Its (lazig (S I I) (S I I)) if isDeterministic else its aSymbolRepresentingTheUniverse,
+	but I'm leaving that open for possible future expansion of considering multiple incompatible forks
+	of wikiState. aSymbolRepresentingTheUniverse aka theMainWikiState.
+	*/
+	isNondeterministic(1, true),
+	//TODO rename it back to isDeterministic and flip the TruthValue? Cuz its shorter to say,
+	//but I also like determinism being sorted first.
+	//Either way, the λ.op byte is (byte)(header>>>32)... wait.. do I want the YES section to be the low bits
+	//so that will be just (byte)header? Still have to verify theres 8 1s in those 16 bits in the 8 TruthValues,
+	//but that would normally be verified when the node is created as its part of merkle forest (key, not val),
+	//even though it could be part of val since it can be derived from the forest shape, but make it part of key
+	//as an optimization.
 			
 	/** If !isDeterministic then either it is the main wiki state (aSymbolRepresentingTheUniverse)
 	or it is something related to "leaving that open for possible future expansion of considering
@@ -134,9 +190,6 @@ public enum HeaderBits{
 	*/
 	hasCachekey(1, true),
 	
-	/** If true, then there are more digits of the height integer than fits in lowBitsOfHeight */
-	isHigher(1, true),
-	
 	/** If !isHigher then this is all bits of the unsigned height integer, else this is only the low n bits of it.
 	TODO should this be ignored (set to its max value?) if isHigher since it
 	might make it harder to compute without having to know how deep you are?
@@ -152,6 +205,16 @@ public enum HeaderBits{
 	then optimized using Compiled.java as in λ.getCompiled() and λ.setCompiled(Compiled).
 	*/
 	lowBitsOfHeight(7, true),
+	
+	lowBitsOfHeight_ignore6(0,false),
+	lowBitsOfHeight_ignore5(0,false),
+	lowBitsOfHeight_ignore4(0,false),
+	lowBitsOfHeight_ignore3(0,false),
+	lowBitsOfHeight_ignore2(0,false),
+	lowBitsOfHeight_ignore1(0,false),
+	
+	/** If true, then there are more digits of the height integer than fits in lowBitsOfHeight */
+	isHigher(1, true),
 	
 	/** These 2 TruthValue spaces were taken by the L and R optimizations 2021-1-8.
 	This is how much space in header is unused and is reserved for future expansion.
@@ -213,6 +276,26 @@ public enum HeaderBits{
 	*/
 	isBitstring(1, false),
 	
+	/** (L x (R x)) equals x, forall x.
+	<br><br>
+	About nonhalters...
+	The normed form of anything that does not halt is (S I I (S I I)),
+	and its 2 childs are (S I I) and (S I I) which are each halted.
+	FIXME I had been using normedFormOfAnythingThatDoesNotHalt as a thing which is its own left and right childs,
+	BUT thats just what it evals to. Confirm (L x (R x)) equals x for (S I I (S I I)).
+	Its 2 childs are both (S I I).
+	1: (L (S I I (S I I))) never halts.
+	2: (R (S I I (S I I))) never halts.
+	3: (L (S I I (S I I)) (R (S I I (S I I)))) never halts.
+	I've been defining any 2 things which never halt as equal to eachother
+	at least in the HeaderBits.returnValOfLeftChildEqualsReturnValOfRightChild way,
+	and I've been using (S I I (S I I)) as the thing they all return,
+	as a semantic for the normed form of anything which does not halt.
+	Since all 3 of those things (1: 2: 3: above) do not halt,
+	we can use the semantic that they all HeaderBits.returnValOfLeftChildEqualsReturnValOfRightChild eachother.
+	*
+	Id.java: public static final Word idKeyOfTheNormedFormOfAnythingThatDoesNotHalt = null;
+	*/
 	returnValOfLeftChildEqualsReturnValOfRightChild(1, false),
 	
 	/** true if left child is same forest shape as right child.
@@ -222,54 +305,86 @@ public enum HeaderBits{
 	This is not the same as returnValOfLeftChildEqualsReturnValOfRightChild kind of equality
 	which is equality of the forest shape of what each child returns (or returns itself if child isHalted).
 	*/
-	leftAndRightForestShapesEqual(1, false),
-	
-	/** isNondeterministic concat curriesAreLeaf together are the λ.op byte used in switch statement
-	in SimpleFn.interpretedMode, and TODO in optimizations of it such as lwjgl opencl GPU and javassist.
-	Changed this to isNondeterministic so the first 128 ops are deterministic, second 128 ops nondeterministic.
-	If isDeterministic then wikiState == (lazig (S I I) (S I I))
-	which is a lambda that infloops for every possible param.
-	If not isDeterministic then lambdaState is some possible function that
-	is probably not completely defined as it will be defined by the accumulation of
-	RFPDs aka <returnValue func param isDeterministic>
-	or RFPWs aka <returnValue func param wikiState> where wikiState may be a specific lambda
-	or may be a salt (isSalt) whose child pointers are made of TruthValue.unknown
-	and it will probably never be known exactly what function the wikiState is
-	or if theres many or just 1 of them, depending if they all fit together consistently or not.
-	The main nondeterministic WikiState is defined by many peoples and computers
-	shared beliefs about it in the form of basically <returnValue func param aSymbolRepresentingTheUniverse>,
-	though in the far more expensive math of Verse.java which is many <ret func param wikiState>-->TruthValue,
-	sparse selections from all possible wikiStates are considered in many sparse combos
-	in how they may align to eachother. In practice we will probably have just 2 wikiStates
-	which are (lazig (S I I) (S I I)) and aSymbolRepresentingTheUniverse.
-	Its (lazig (S I I) (S I I)) if isDeterministic else its aSymbolRepresentingTheUniverse,
-	but I'm leaving that open for possible future expansion of considering multiple incompatible forks
-	of wikiState. aSymbolRepresentingTheUniverse aka theMainWikiState.
-	*/
-	isNondeterministic(1, true),
-	//TODO rename it back to isDeterministic and flip the TruthValue? Cuz its shorter to say,
-	//but I also like determinism being sorted first.
-	//Either way, the λ.op byte is (byte)(header>>>32)... wait.. do I want the YES section to be the low bits
-	//so that will be just (byte)header? Still have to verify theres 8 1s in those 16 bits in the 8 TruthValues,
-	//but that would normally be verified when the node is created as its part of merkle forest (key, not val),
-	//even though it could be part of val since it can be derived from the forest shape, but make it part of key
-	//as an optimization.
-	
-	/** isNondeterministic concat curriesAreLeaf together are the λ.op byte used in switch statement
-	in SimpleFn.interpretedMode, and TODO in optimizations of it such as lwjgl opencl GPU and javassist.
-	Self and (this many - 1) curries viewed by self.isLeaf() .. self.L().L().L().L().L().L().isLeaf().
-	Each next parent just bit shifts this part of the header long and ORs in itself (which is not leaf
-	unless its 2 childs are identityFunc and leaf which are the 2 childs of leaf to "close the loop").
-	Knowing that allows recursing less deep to know what opcode to do.
-	<br><br>
-	Usually you can only know x.isLeaf or !x.isLeaf if x.isHalted.
-	*/
-	curriesAreLeaf(7, true);
+	leftAndRightForestShapesEqual(1, false);
 	
 	/** number of 2-bit TruthValues */
 	public final int tvs;
 	
 	public final boolean isPartOfMerkleForest;
+	
+	/** aligns to high, and aligns to low, half of long header */
+	public final int myimask;
+	
+	public final long myyesmask;
+	
+	public final long mynomask;
+	
+	public final long mybullmask;
+	
+	/** This only works if you know specificly that each of the 8 bits in op are TruthValue.yes or TruthValue.no,
+	as represented in int instead of long. If thats true of a long, then this int can be the yes side of it.
+	<br><br>
+	The returned byte is <0 vs >=0 depending if isNondeterministic vs deterministic (FIXME swapped order of those?).
+	*/
+	public static byte opByte(int h){
+		//This requires curriesAreLeaf (7) and isNondeterministic (1) (or rename it back to isDeterministic) be adjacent.
+		return (byte)(h>>curriesAreLeaf.ordinal());
+	}
+	
+	public static final int imaskOfOpByte = curriesAreLeaf.myimask|isNondeterministic.myimask;
+	
+	public static byte opByte(long h) throws NotAllYesOrNo{
+		//TODO optimize by computing it directly from the long with no deeper function calls
+		int obs = observes(h);
+		if((obs&imaskOfOpByte) != imaskOfOpByte) throw NotAllYesOrNo.instance;
+		return opByte(yeses(h));
+	}
+	
+	/** high bit is isHigher which is 1 if height does not fit in the low 7 bits.
+	TODO should those low 7 bits still be the low 7 digits of it, or should it be some constant or TruthValue.unknown?
+	<br><br>
+	If the returned byte < 0 then its higher than fits in those 7 bits.
+	*/
+	public static byte heightByte(int h){
+		//This requires lowBitsOfHeight (7) and isHigher (1) be adjacent.
+		return (byte)(h>>lowBitsOfHeight.ordinal());
+	}
+	
+	public static final int imaskOfHeightByte = lowBitsOfHeight.myimask|isHigher.myimask;
+	
+	public static byte heightByte(long h) throws NotAllYesOrNo{
+		//TODO optimize by computing it directly from the long with no deeper function calls
+		int obs = observes(h);
+		if((obs&imaskOfHeightByte) != imaskOfHeightByte) throw NotAllYesOrNo.instance;
+		return heightByte(yeses(h));
+	}
+	
+	/** see comment about the sign bit being isDeterministic vs isNondeterministic */
+	public static byte opByte(λ x) throws NotAllYesOrNo{
+		return opByte(x.header());
+	}
+	
+	/** see comment about the sign bit not being a digit of height */
+	public static byte heightByte(λ x) throws NotAllYesOrNo{
+		return heightByte(x.header());
+	}
+	
+	/** Only works where HeaderBits.tvs==1. */
+	public TruthValue tv(λ x){
+		return tv(x.header());
+	}
+	
+	/** Only works where HeaderBits.tvs==1.
+	Example: TruthValue xIsHalted = HeaderBits.isHalted.tv(x.header());
+	*/
+	public TruthValue tv(long header){
+		if(tvs != 1) throw new RuntimeException("Doesnt fit in 1 TruthValue");
+		boolean y = (header&myyesmask) != 0;
+		boolean n = (header&mynomask) != 0;
+		return y
+			? (n ? TruthValue.bull : TruthValue.yes)
+			: (n ? TruthValue.no : TruthValue.unknown);
+	}
 	
 	/** High 32 bits are the yes parts. Low 32 bits are the no parts.
 	AND those to get bull. AND(NOT NOT) those to get unknown.
@@ -300,6 +415,10 @@ public enum HeaderBits{
 	*/
 	public static final long valMask;
 	static{
+		if(HeaderBits.values().length != 32) throw new RuntimeException(
+			"There must be exactly 32 enum values, aligning their Enum.ordinal() to their bit index"
+			+" in an int, as theres 2 ints in the high and low of long header. Number of enums: "
+			+HeaderBits.values().length);
 		long m = 0;
 		long maskPrinter = 0x100000001L;
 		for(HeaderBits h : HeaderBits.values()){
@@ -314,18 +433,72 @@ public enum HeaderBits{
 	}
 	public static final long keyMask = ~valMask;
 	
-	public static final long yesMask = 0xffffffff00000000L;
+	//FIXME 2021-1-9 I swapped yesMask and noMask so (int)header would be the yes bits.
 	
-	public static final long noMask =  0x00000000ffffffffL;
+	public static final long yesMask = 0x00000000ffffffffL;
+	
+	public static final long noMask =  0xffffffff00000000L;
 	
 	/** header is 32 TruthValues. Returns true iff any of them are TruthValue.bull */
 	public static boolean hasAnyBull(long header){
 		return (((int)(header>>32))&(int)header)!=0;
 	}
 	
+	public static int yeses(long header){
+		return lo(header);
+	}
+	
+	public static int nos(long header){
+		return hi(header);
+	}
+	
+	/** Which of the 32 TruthValues are exactly 1 of TruthValue.yes or TruthValue.no (not unknown or bull) */
+	public static int observes(long header){
+		return (int)(header>>32)^(int)header;
+	}
+	
+	public static int unknowns(long header){
+		return ~(int)(header>>32)&~(int)header;
+	}
+	
+	public static int bulls(long header){
+		return (int)(header>>32)&(int)header;
+	}
+	
+	/** x.header()&keyMask == headerKeyOf2Headers(x.l().header(),x.r().header()),
+	forall x where each of the TruthValues in the key part of their headers are TruthValue.yes or TruthValue.no,
+	which will always be true in the TruthValues in the key part of header since they are used
+	in merkle hashing so must be a specific bit each, but they're still useful for error detection
+	such as if someone gives you the same 192 bits of hash but with different key bits in the header.
+	This uses &keyMask on each of its 2 params.
+	*/
+	public static long headerKeyOf2Headers(long headerA, long headerB){
+		long headerKeyA = headerA&keyMask;
+		long headerKeyB = headerB&keyMask;
+		
+		TODO use opByteOf2ChildOpBytes and heightByteOf2ChildHeightBytes
+		
+		TODO finish this func, then finish (long)Id.headerKeyOf2Headers(long,long),
+		then hook it into λ.idKey().
+	}
+	
+	public static byte opByteOf2ChildOpBytes(byte opByteA, byte opByteB){
+		"TODO is there another function i wrote some code for but didnt finish"
+		"TODO maybe cache this in a byte[1<<16]"
+	}
+	
+	public static byte heightByteOf2ChildHeightBytes(byte heightByteA, byte heightByteB){
+		TODO
+		"TODO maybe cache this in a byte[1<<16]? Probably not cuz this is simpler than opByteOf2ChildOpBytes"
+	}
+	
 	HeaderBits(int tvs, boolean isPartOfMerkleForest){
 		this.tvs = tvs;
 		this.isPartOfMerkleForest = isPartOfMerkleForest;
+		myimask = ((int)((1L<<tvs)-1))<<ordinal();
+		mybullmask = ii(myimask,myimask);
+		myyesmask = mybullmask&yesMask;
+		mynomask = mybullmask&noMask;
 	}
 	
 	public static void main(String[] args){
@@ -333,7 +506,7 @@ public enum HeaderBits{
 		int tvSum = 0;
 		for(HeaderBits h : HeaderBits.values()){
 			tvSum += h.tvs;
-			lg(h+" "+h.tvs+" ("+tvSum+") "+h.isPartOfMerkleForest);
+			lg(h+" "+h.tvs+" ("+tvSum+") ordinal="+h.ordinal()+" mask="+Text.intTo32Chars(h.imask)+" "+h.isPartOfMerkleForest);
 		}
 	}
 	

@@ -7,7 +7,7 @@ import java.lang.ref.SoftReference;
 //import static wikibinator.impl.Cache.*;
 import java.util.function.Supplier;
 
-import javax.print.attribute.standard.MediaSize.Other;
+
 
 import wikibinator.Compiled;
 import wikibinator.WikiState;
@@ -173,33 +173,65 @@ public class SimpleFn implements λ{
 		}*/
 	
 		λ x = func.L().R(), y = func.R(), z = param; //the 3 params of each of 8 ops
-		switch(opOfCall&7){ //8 opcodes, though some of them use the next 2 bits like opcodes
-		case opS:
+		switch(opOfCall&31){ //8 opcode categories, though some of them use the next 2 bits like opcodes
+		case opS00: case opS01: case opS10: case opS11:
 			return x.e(z).e(y.e(z));
 		//break;
-		case opT:
-			return y;
+		case opTFI00: case opTFI01:
+			//TODO swap the order of T and FI?
+			return y; //FI
+		case opTFI10: case opTFI11:
+			//TODO swap the order of T and FI?
+			return x; //T
 		//break;
-		case opFI:
-			return z;
+		//case opFI:
+		//	return z;
 		//break;
-		case opReflect:
-			if(x.isLeaf()){
-				return z.isLeaf() ? T : F;
-			}else{ //!x.isLeaf
-				return y.isLeaf() ? z.L() : z.R();
-			}
+		case opReflect00:
+			return z.isLeaf();
+		case opReflect01:
+			return z.isDeterministic();
+		case opReflect10:
+			return z.l();
+		case opReflect11:
+			return z.r();
+		//	if(x.isLeaf()){
+		//		return z.isLeaf() ? T : F;
+		//	}else{ //!x.isLeaf
+		//		return y.isLeaf() ? z.L() : z.R();
+		//	}
 		//break;
-		case opPair:
+		case opTypeval00: case opTypeval01: case opTypeval10: case opTypeval11:
+		case opPair00: case opPair01: case opPair10: case opPair11:
+			//Typeval is same as pair func but is useful as a semantic. same as pair func but its useful as a semantic. 
 			return z.e(x).e(y);
 		//break;
-		case opSecondLastInList:
+		case opSecondLastInList00: case opSecondLastInList01: case opSecondLastInList10: case opSecondLastInList11:
+			//GetFuncBody aka getSecondLastInList
 			if(z.R().R().isLeaf()) return z.L();
 			//return this.e(z.R()); //this fn (in the call <this,z>) is a function that gets second last in a linkedlist
 			//return secondLastInList.e(z.R());
-			return GetFuncBody.e(z.R());
+			return GetFuncBody.e(z.R()); //recurse
 		//break;
-		case opCurry:
+		case opCurry00: case opCurry01:
+			//if(x.isLeaf()){ //x is counter and has counted down to 0 (such as (T (T (T u))) is 3 and u is 0. Eval.
+			
+			if(1<2) throw new RuntimeException("FIXME should that be x.R().isLeaf(), and what if x is already leaf? this is an offby1error");
+			λ nextLinkedList = Pair.e(z).e(y); //y is linkedList. z is nextParam.
+			λ funcBody = GetFuncBody.e(nextLinkedList);
+			return funcBody.e(nextLinkedList);
+			//FIXME??? offby1error in size of nextLinkedList including nextParam or not? offby1error somewhere else?
+			
+		case opCurry10: case opCurry11:
+			//}else{ //has not counted down to 0 yet, so count down 1 more and add nextParam to linkedlist
+			
+			λ nextLinkedList = Pair.e(z).e(y); //y is linkedList. z is nextParam.
+			λ counterAsOneLess = x.R();
+			return Curry.e(counterAsOneLess).e(nextLinkedList); //wait for next param to curry again or eval
+			//FIXME??? offby1error in size of nextLinkedList including nextParam or not? offby1error somewhere else?
+			
+			
+			/*
 			//Curry x y z //(Curry counter linkedList nextParam)
 			//--ifItsEnoughCurriesToEval--> (LastInList next_linkedList next_linkedList).
 			λ nextLinkedList = Pair.e(z).e(y); //y is linkedList. z is nextParam.
@@ -213,8 +245,9 @@ public class SimpleFn implements λ{
 				//FIXME??? offby1error in size of nextLinkedList including nextParam or not? offby1error somewhere else?
 				return Curry.e(counterAsOneLess).e(nextLinkedList); //wait for next param to curry again or eval
 			}
+			*/
 		//break;
-		case opWiki:
+		case opWiki00: case opWiki01: case opWiki10: case opWiki11:
 			/*before calling wiki function, check isDirty(byte) and if !isDirty then eval to (S I I (S I I)). call fnThatInfiniteLoopsForAllPossibleParams=(S (T (S I I)) (T (S I I))) or something like that maybe using lazig on 2 of (S I I)... or simply call (S I I) on itself aka callParamOnItself.e(callParamOnItself)... or just inline it as S.e(I).e(I).e(S.e(I).e(I)); */
 			if(!func.isDirty()) infloop(); //return S.e(I).e(I).e(S.e(I).e(I)); //infloop so anything that halts is deterministic
 			return WikiState.wiki.apply(param); //allow nondeterminism (forkEdit wiki) as long as (L x (R x)) equals x, forall x.
