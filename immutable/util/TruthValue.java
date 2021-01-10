@@ -1,5 +1,8 @@
 package immutable.util;
 
+import wikibinator.impl.Bull;
+import wikibinator.impl.Unknown;
+
 /** Unknown is the default answer for every question,
 which may become yes or no but if it becomes both at once
 (2 different paths of figuring things out, one leads to yes and one leads to no),
@@ -51,6 +54,17 @@ public enum TruthValue{
 		case yes: return no;
 		case no: return yes;
 		default: return this;
+		}
+	}
+	
+	/** observe yes or no, else throw Unknown or Bull */
+	public boolean z() throws Bull, Unknown{
+		switch(this){
+		case unknown: throw Unknown.instance;
+		case no: return false;
+		case yes: return true;
+		case bull: throw Bull.instance;
+		default: throw new RuntimeException("This cant happen. Why is eclipse making me put this here?"); 
 		}
 	}
 	

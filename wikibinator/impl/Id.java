@@ -5,6 +5,7 @@ import java.util.function.UnaryOperator;
 import immutable.util.HashUtil;
 import immutable.util.MathUtil;
 import wikibinator.HeaderBits;
+import wikibinator.Word;
 
 public class Id{
 	private Id(){}

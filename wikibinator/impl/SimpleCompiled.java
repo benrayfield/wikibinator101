@@ -1,5 +1,4 @@
 package wikibinator.impl;
-
 import java.util.function.BinaryOperator;
 
 import wikibinator.Compiled;
@@ -9,12 +8,17 @@ public class SimpleCompiled implements Compiled{
 	
 	protected boolean on = true;
 	
-	public Compiled prevOrNull;
+	public final Compiled prevOrNull;
 	
 	public final BinaryOperator<λ> wrapMe;
 	
 	public SimpleCompiled(BinaryOperator<λ> wrapMe){
+		this(wrapMe, null);
+	}
+	
+	public SimpleCompiled(BinaryOperator<λ> wrapMe, Compiled prevOrNull){
 		this.wrapMe = wrapMe;
+		this.prevOrNull = prevOrNull;
 	}
 
 	/** todo optimize by extending SimpleCompiled directly and overriding this apply func, consistent with setOn and prev etc? */

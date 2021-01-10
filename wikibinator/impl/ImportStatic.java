@@ -37,34 +37,6 @@ public class ImportStatic{
 		return (op&0x80)!=0;
 	}
 	
-	/** Range 0-6. Number of params more to curry before this would eval.
-	If 0, is now evaling. If 6, its u (aka the universal function).
-	*/
-	public static int opCur(byte op){
-		//TODO optimize using byte[256]? Or is this faster?
-		int i = (op&0x7f); //0..127
-		if(i == 0) return 0;
-		if(i == 1) return 6; //is u
-		return opCur((byte)(i>>1))-1; //TODO verify this is not offby1
-	}
-	
-	public static boolean opIsHalted(byte op){
-		//TODO optimize by not computing which nonzero value cur is, just is it 0 or not.
-		return opCur(op)!=0;
-	}
-	
-	/** This is what happens when you call an evaling on an evaling,
-	or a halted on an evaling, or an evaling on a halted.
-	If it just started to eval, then its op would be in range 64-127 (or that minus 128 as the isDirty bit).
-	*/
-	public static boolean areLow7BitsOfOpAll0(byte op){
-		return (op&0x7f)==0;
-	}
-	
-	public static boolean opIsLeaf(byte op){
-		return (op&0x7f)==1;
-	}
-	
 	/*
 	he 8 opcodes, chosen in the first 3 of 6 parameters...
 
@@ -86,7 +58,7 @@ public class ImportStatic{
 	But more likely isForceDeterminism is not part of node itself but is part of NondetNode???
 	*/
 	
-	Theres already 32 opcodes in the 6 params of the universalFunc, as the first 5 params each being leaf vs nonleaf.
+	/*Theres already 32 opcodes in the 6 params of the universalFunc, as the first 5 params each being leaf vs nonleaf.
 	UPDATE: actually 64 opcodes by counting the isDeterministic bit in header (TODO put that beside the 7 curryLeaf
 	bits aka the byte op, so its actually 8 adjacent bits a byte, which is actually 16 bits in 2 places as 8 TruthValues).
 	UPDATE: actually theres around 128 (126?) opcodes cuz of counting there being 0..6 curries like binheap indexing,
@@ -160,28 +132,39 @@ public class ImportStatic{
 	*/	
 
 	public static final byte
-		opWiki = 0, //1. TODO for possible future expansion? theres space to put 3 more unary ops here, or 1 more that takes 2 params and 1 more unary.
-		opReflect = 1; //3: L 1, R 1, IsLeaf 1, isDeterministic 1.
-		opTFI = 2, //3
-		opS = 3, //3
-		opTypeval = 4, //3, same as opPair except the semantic
-		opPair = 5; //3
-		opSecondLastInList = 6, //1. TODO for possible future expansion? theres space to put 3 more unary ops here, or 1 more that takes 2 params and 1 more unary.
-		opCurry = 7, //3
+		opWiki_1 = 0, //1. TODO for possible future expansion? theres space to put 3 more unary ops here, or 1 more that takes 2 params and 1 more unary.
+		opReflect_3 = 1, //3: L 1, R 1, IsLeaf 1, isDeterministic 1.
+		opTFI_3 = 2, //3
+		opS_3 = 3, //3
+		opPair_3 = 4, //3
+		opTypeval_3 = 5, //3, same as opPair except the semantic
+		opSecondLastInList_1 = 6, //1. TODO for possible future expansion? theres space to put 3 more unary ops here, or 1 more that takes 2 params and 1 more unary.
+		opCurry_3 = 7; //3
 			
 			
 		//Have 1 more space coult put a 1 param func,
 		//but 6 params is simpler than 5 cuz would squash them together too tightly.
 		//Keep it as 6 params. Its maybe the best possible digital universal function, either that or is very close to it.
 	
-	public static final byte opWiki00=opWiki*4, opWiki01=opWiki*4+1, opWiki10=opWiki*4+2, opWiki11=opWiki*4+3;
-	public static final byte opS00=opS*4, opS01=opS*4+1, opS10=opS*4+2, opS11=opS*4+3;
-	public static final byte opTFI00=opTFI*4, opTFI01=opTFI*4+1, opTFI10=opTFI*4+2, opTFI11=opTFI*4+3;
-	public static final byte opSecondLastInList00=opSecondLastInList*4, opSecondLastInList01=opSecondLastInList*4+1, opSecondLastInList10=opSecondLastInList*4+2, opSecondLastInList11=opSecondLastInList*4+3;
-	public static final byte opTypeval00=opTypeval*4, opTypeval01=opTypeval*4+1, opTypeval10=opTypeval*4+2, opTypeval11=opTypeval*4+3;
-	public static final byte opPair00=opPair*4, opPair01=opPair*4+1, opPair10=opPair*4+2, opPair11=opPair*4+3;
-	public static final byte opCurry00=opCurry*4, opCurry01=opCurry*4+1, opCurry10=opCurry*4+2, opCurry11=opCurry*4+3;
-	public static final byte opReflect00=opReflect*4, opReflect01=opReflect*4+1, opReflect10=opReflect*4+2, opReflect11=opReflect*4+3;
+	public static final byte opWiki00=opWiki_1*4, opWiki01=opWiki_1*4+1, opWiki10=opWiki_1*4+2, opWiki11=opWiki_1*4+3;
+	public static final byte opS00=opS_3*4, opS01=opS_3*4+1, opS10=opS_3*4+2, opS11=opS_3*4+3;
+	public static final byte opTFI00=opTFI_3*4, opTFI01=opTFI_3*4+1, opTFI10=opTFI_3*4+2, opTFI11=opTFI_3*4+3;
+	public static final byte opSecondLastInList00=opSecondLastInList_1*4, opSecondLastInList01=opSecondLastInList_1*4+1, opSecondLastInList10=opSecondLastInList_1*4+2, opSecondLastInList11=opSecondLastInList_1*4+3;
+	public static final byte opTypeval00=opTypeval_3*4, opTypeval01=opTypeval_3*4+1, opTypeval10=opTypeval_3*4+2, opTypeval11=opTypeval_3*4+3;
+	public static final byte opPair00=opPair_3*4, opPair01=opPair_3*4+1, opPair10=opPair_3*4+2, opPair11=opPair_3*4+3;
+	public static final byte opCurry00=opCurry_3*4, opCurry01=opCurry_3*4+1, opCurry10=opCurry_3*4+2, opCurry11=opCurry_3*4+3;
+	public static final byte opReflect00=opReflect_3*4, opReflect01=opReflect_3*4+1, opReflect10=opReflect_3*4+2, opReflect11=opReflect_3*4+3;
+	
+	/*
+	public static final byte opWiki00=opWiki_1*4, opWiki01=opWiki_1*4+1, opWiki10=opWiki_1*4+2, opWiki11=opWiki_1*4+3;
+	public static final byte opS00=opS_3*4, opS01=opS_3*4+1, opS10=opS_3*4+2, opS11=opS_3*4+3;
+	public static final byte opTFI00=opTFI_3*4, opTFI01=opTFI_3*4+1, opTFI10=opTFI_3*4+2, opTFI11=opTFI_3*4+3;
+	public static final byte opSecondLastInList00=opSecondLastInList_1*4, opSecondLastInList01=opSecondLastInList_1*4+1, opSecondLastInList10=opSecondLastInList_1*4+2, opSecondLastInList11=opSecondLastInList_1*4+3;
+	public static final byte opTypeval00=opTypeval_3*4, opTypeval01=opTypeval_3*4+1, opTypeval10=opTypeval_3*4+2, opTypeval11=opTypeval_3*4+3;
+	public static final byte opPair00=opPair_3*4, opPair01=opPair_3*4+1, opPair10=opPair_3*4+2, opPair11=opPair_3*4+3;
+	public static final byte opCurry00=opCurry_3*4, opCurry01=opCurry_3*4+1, opCurry10=opCurry_3*4+2, opCurry11=opCurry_3*4+3;
+	public static final byte opReflect00=opReflect_3*4, opReflect01=opReflect_3*4+1, opReflect10=opReflect_3*4+2, opReflect11=opReflect_3*4+3;
+	*/
 	
 	/** TODO derive a fn which computes getComment instead of hardcoding it here */
 	public static λ getComment(λ anyVarargLambda){
@@ -205,9 +188,16 @@ public class ImportStatic{
 	keeping in mind that pure determinism can exist as a call inside nondeterminism
 	thats deterministic higher on stack and nondeterministic lower on stack.
 	*/
-	public static void infloop(){
+	public static λ infloop(){
 		throw new RuntimeException("TODO define the S and I funcs");
 		//TODO return S.e(I).e(I).e(S.e(I).e(I));
+	}
+	
+	/** called by SimpleFn.interpretedMode etc to infloop and be a semantic in the VM code
+	that such behavior might change in a future version, and infloop is the easiest to change.
+	*/
+	public static λ reservedForPossibleFutureExpansion(){
+		return infloop();
 	}
 	
 	/** the leaf which all paths in binary forest lead to,

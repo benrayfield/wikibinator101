@@ -2,35 +2,49 @@ package wikibinator;
 import static wikibinator.impl.ImportStatic.*;
 import java.util.function.UnaryOperator;
 
+import immutable.util.TruthValue;
 import wikibinator.Compiled;
-import wikibinator.impl.TODO;
-import wikibinator.impl.Word;
-import wikibinator.impl.it;
-import wikibinator.impl.of;
-import wikibinator.impl.ok;
-import wikibinator.impl.put;
 
 public strictfp interface λ extends UnaryOperator<λ>, /*Blob,*/ ob{
 	
-	/** eval */
-	public λ e(){
-		TODO use SimpleFn.cacheAnyRet (debugStepOver) and if thats not there then debugStepInto aka recurse to compute it
-		then cache it.
-		
-		TODO is param of eval an ok place to put a maxSpend-like param,
-		or should that (as I've been planning since the start of wikibinator) stay entirely in wikiState?
-		What if wikiState calls such an eval(...spend/wallet/maxSpend/solve/etc-related params...)
-		as wikiState can be nondeterministic as long as it converges to be consistent RFPD or RFPW
-		consistent with the rest of the world or if multiple wikiStates then consistent with that specific wikiState.
-	}
+	/** If true then long header() is 1 of the merkle childs, instead of just L() and R() and isDeterministic.
+	It means that to grow the bloomFilter you have to forkEdit everything upward,
+	which would be very slow but is a possibly useful research path to converge it better in p2p networks
+	since each peer commits to every part of bloomFilter reachable from everything they send to you,
+	so if theres any bull in it, or can be derived from it, they are more accountable to the rules of math.
+	*
+	public default boolean isMerkleHeader(){
+		return HeaderBits.isMerkleHeader.z(this);
+	}*/
 	
-	/** returns null (or should it throw Bull.instance?) if spend isnt enough.
+	/** eval. Warning: may not not. Use e(long maxSpend) if you want guaranteed halting within that time and memory limit.
+	<br><br>
+	TODO use SimpleFn.cacheAnyRet (debugStepOver) and if thats not there then debugStepInto aka recurse to compute it
+	then cache it.
+	<br><br>	
+	TODO is param of eval an ok place to put a maxSpend-like param,
+	or should that (as I've been planning since the start of wikibinator) stay entirely in wikiState?
+	What if wikiState calls such an eval(...spend/wallet/maxSpend/solve/etc-related params...)
+	as wikiState can be nondeterministic as long as it converges to be consistent RFPD or RFPW
+	consistent with the rest of the world or if multiple wikiStates then consistent with that specific wikiState.
+	*/
+	public λ e();
+	
+	/** Returns x where 0 <= x.gas < maxSpend of whatever it did not spend,
+	and where x.fn is what the lambda math returned if x.gas==0 then x.fn==null.
+	This is nondeterministic and
+	is normally called from inside wiki, since wiki is the only nondeterministic function,
+	but technically it can also be called from outside the system too.
+	It just cant be called recursively where isDeterministic.
+	It can be called once on a deterministic calculation that will either finish or not within the
+	given amount of gas/maxSpend (which should automatically adjust ratios
+	f costs between compute cycles, memory, etc in units of "gas".
+	<br><br>
+	OLD... returns null (or should it throw Bull.instance?) if spend isnt enough.
 	FIXME it needs to return how much was left unspent. Maybe this should return long,
 	then call another func like E() which only returns λ if the return value is cached like in SimpleFn.cacheAnyRet.
 	*/
-	public λ e(long maxSpend){
-		
-	}
+	public $λ e(long maxSpend);
 	
 	/** lazy lambda call, always halts instantly, basically just create or find a binary forest node
 	where this is its l() and param is its r(), that if you call eval() on returns what (this param) evals to,
@@ -61,19 +75,44 @@ public strictfp interface λ extends UnaryOperator<λ>, /*Blob,*/ ob{
 	we will hopefully converge toward truth and the lack of bull.
 	*/
 	public default Word idKey(){
-		TODO
+		throw new RuntimeException("TODO");
 	}
 	
 	/** lazy. see comment of idKey(). This is a godel-number-like-statement. */
 	public default Word idKeyVal(){
-		"TODO return idKey but with one of the longs replaced by header.""
+		throw new RuntimeException("TODO");
+		//"TODO return idKey but with one of the longs replaced by header."
 	}
 	
 	/** 32 TruthValues (high 32 bits are the YES parts, low 32 bits are NO parts) described in HeaderBits */
 	public long header();
 	
-	/** modifies header by ORing it with oreq, as its made of TruthValues of 2 bits each. */
+	/** modifies header by ORing it with oreq, as its made of TruthValues of 2 bits each.
+	This throws if merkleHeader(). merkle and nonmerkle header λs are not used together directly.
+	*/
 	public void headerOreq(long oreq);
+	
+	/** Returns a λ which has the same forest of call pairs all the way down to λleaf
+	which is the same forest shape as this λ and has λ.merkleHash()==true and has λ.header()== the param header.
+	If merkleHash() then this is bigO(1). If this is not merkleHash() then this copies all those below
+	once slowly so every time after that, this setHeader(long) function is bigO(1).
+	Aka it uses setIsMerkleHeader(boolean isMerkleHeader) to switch between those 2 kinds of λ if needed.
+	*
+	public λ setHeader(long header);
+	
+	//TODO should there be a TruthValue in HeaderBits for isMerkleHeader?
+	
+	/** if merkleHeader()==newIsMerkleHeader then return this, else... see comment of setHeader(long). *
+	public λ setIsMerkleHeader(boolean isMerkleHeader);
+	*
+	
+	public default long keyMask(){
+		return merkleHeader() ? HeaderBits.keyMask_if_merkleHeader : HeaderBits.keyMask;
+	}
+	
+	public default long valMask(){
+		return ~keyMask();
+	}*/
 	
 	/*TODO use binheap indexing to do what Blob does for a linear range, instead of implementing Blob?
 	Im thinking of storing the first n bits in each cbt in all higher binary forest nodes,
@@ -132,6 +171,30 @@ public strictfp interface λ extends UnaryOperator<λ>, /*Blob,*/ ob{
 		return g(3L);
 	}
 	
+	/** UPDATE: HeaderBits.isDirty means nondeterministic, and !isDirty means deterministic.
+	If is deterministic (!isDirty), returns the nondeterministic form. If nondeterministic, returns the deterministic form.
+	These 2 λs normally remember eachother instead of creating a new one, so x.flip().flip()==x is often true but
+	doesnt have to be. It is always true that x.flip().flip().equals(x).
+	This is same as setDeterministic(!isDeterministic());
+	<br><br>
+	OLD...
+	The isNondeterministic TruthValue in header is part of key but is not part of the content to hash to generate the 192 bit hash
+	and instead you just change that 1 TruthValue in header and the other TruthValues in header may differ
+	so can set the val parts of those to unknown and recompute the first time since
+	wikiState differs between (S I I (S I I)) in deterministic λs vs the wikiState being whatever
+	many people and computers converge toward together a consistent set of RFPD cache entries
+	as <someReturnValue (wiki someParam)>.
+	*/
+	public λ flip();
+	
+	/** forkEdit to set HeaderBits.isDirty here only. todo choose 1 of setDeterministic or setNondeterministic and similarly named in HeaderBits */
+	public λ setDirty(boolean dirty);
+	
+	/** forkEdit to set HeaderBits.isDirty recursively to all be dirty or all !dirty,
+	even though its allowed for nondet to be able to reach both nondet and det, but det can only reach det.
+	*/
+	public λ setDirtyDeep(boolean dirtyDeep);
+	
 	/** same as L().R(). This is an optimization for getting x out of ((pair x) y) aka (pair x y)
 	without (pair x) having to exist.
 	*/
@@ -188,18 +251,20 @@ public strictfp interface λ extends UnaryOperator<λ>, /*Blob,*/ ob{
 	*/
 	public byte op();
 	
-	public default TruthValue isLeaf(){
-		return opIsLeaf(op());
+	public default boolean isLeaf(){
+		return HeaderBits.isLeaf(this);
+		//return opIsLeaf(op());
 	}
 	
-	FIXME this should be !HeaderBits.isDeterministic.
-	public default TruthValue isDirty(){
-		HeaderBits.isDeterministic
-		return opIsDirty(op());
+	public default boolean isDirty(){
+		return HeaderBits.isDirty.z(this);
+		//HeaderBits.isDeterministic
+		//return opIsDirty(op());
 	}
 	
 	public default TruthValue isHalted(){
-		return opIsHalted(op());
+		return HeaderBits.isHalted.tv(this);
+		//return opIsHalted(op());
 	}
 	
 	/** bits of cbt, or null if this is not a cbt or is not optimized as such a wrapper. See comment of this class. */

@@ -1,4 +1,4 @@
-package wikibinator.impl;
+package wikibinator;
 import static mutable.util.Lg.*;
 import java.lang.ref.SoftReference;
 import java.util.Random;
@@ -6,8 +6,6 @@ import java.util.Random;
 import immutable.util.MathUtil;
 import immutable.util.Text;
 import mutable.util.Rand;
-import wikibinator.Compiled;
-import wikibinator.λ;
 
 /** uint256, the default "word size" of this system such as id256,
 though you can derive other id sizes and types at runtime

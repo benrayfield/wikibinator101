@@ -7,7 +7,6 @@ import immutable.util.TruthValue;
 import wikibinator.impl.Bull;
 import wikibinator.impl.NotAllYesOrNo;
 import wikibinator.impl.Unknown;
-import wikibinator.impl.Word;
 
 /** (long)λ.header() is made of TruthValues of 2 bits each,
 storing the YES bits in the high 32 bits of a long and the NO bits in the low 32 bits.
@@ -71,7 +70,8 @@ public enum HeaderBits{
 	curriesAreLeaf_ignore2(0, false),
 	curriesAreLeaf_ignore1(0, false),
 	
-	/** isNondeterministic concat curriesAreLeaf together are the λ.op byte used in switch statement
+	/** Renamed to isDirty, which means isNondeterministic.
+	isNondeterministic concat curriesAreLeaf together are the λ.op byte used in switch statement
 	in SimpleFn.interpretedMode, and TODO in optimizations of it such as lwjgl opencl GPU and javassist.
 	Changed this to isNondeterministic so the first 128 ops are deterministic, second 128 ops nondeterministic.
 	If isDeterministic then wikiState == (lazig (S I I) (S I I))
@@ -93,14 +93,51 @@ public enum HeaderBits{
 	but I'm leaving that open for possible future expansion of considering multiple incompatible forks
 	of wikiState. aSymbolRepresentingTheUniverse aka theMainWikiState.
 	*/
-	isNondeterministic(1, true),
-	//TODO rename it back to isDeterministic and flip the TruthValue? Cuz its shorter to say,
+	isDirty(1, true),
+	
+	//UPDATE: renaming it to isDirty which means isNondeterministic.
+	//TODO?? rename it (from isNondeterministic) back to isDeterministic and flip the TruthValue? Cuz its shorter to say,
 	//but I also like determinism being sorted first.
 	//Either way, the λ.op byte is (byte)(header>>>32)... wait.. do I want the YES section to be the low bits
 	//so that will be just (byte)header? Still have to verify theres 8 1s in those 16 bits in the 8 TruthValues,
 	//but that would normally be verified when the node is created as its part of merkle forest (key, not val),
 	//even though it could be part of val since it can be derived from the forest shape, but make it part of key
 	//as an optimization.
+	
+	/** If !isHigher then this is all bits of the unsigned height integer, else this is only the low n bits of it.
+	TODO should this be ignored (set to its max value?) if isHigher since it
+	might make it harder to compute without having to know how deep you are?
+	This may bits of height allows it to describe that a cbt has 1 bit, 2 bits .. 2^61 bits (about 2 exabits),
+	todo is that offby1 aka 2^60 bits 2^59 bits? verify the exact number, but somewhere around 1 exabit.
+	It doesnt store the exact bit length of the cbtBitstring, just the powOf2 it fits in
+	(and it might be smaller than that powOf2 such as if the right child is all 0s).
+	If you want to know the long size in bits (bize) of it, use RFPD cache
+	<(bize aBitstring) 1152921504606846976L> aka the claim that (bize aBitstring) returns the cbt64
+	returned by (baseTenToSignedCbt64 "1152921504606846976") but thats just a way to display
+	numbers in baseTen depending on some syntax or another which will also be derived by combos of λ,
+	where bize and baseTenToSignedCbt64 would be functions derived from combos of λ
+	then optimized using Compiled.java as in λ.getCompiled() and λ.setCompiled(Compiled).
+	*/
+	lowBitsOfHeight(7, true),
+	
+	lowBitsOfHeight_ignore6(0,false),
+	lowBitsOfHeight_ignore5(0,false),
+	lowBitsOfHeight_ignore4(0,false),
+	lowBitsOfHeight_ignore3(0,false),
+	lowBitsOfHeight_ignore2(0,false),
+	lowBitsOfHeight_ignore1(0,false),
+	
+	/** If true, then there are more digits of the height integer than fits in lowBitsOfHeight */
+	isHigher(1, true),
+	
+	/** If false in x then x.isDirty==x.l.isDirty==x.r.isDirty and so on recursively all the isDirty are yes or all are no.
+	The purpose of tracking this is the merkle hash id (192 bits) is the same between x and y where
+	x and y have the same forest shape and differ only in x.isDirty!=y.isDirty,
+	but if containsDirtyAndNondirtyDeeply then the merkle hash differs.
+	Of course if its a literal of 1..128 bits of cbt then its not a hash id there so is the same 192 bits either way,
+	BUT... a literal id can only be optimized that way if containsDirtyAndNondirtyDeeply everywhere inside it.
+	*/
+	containsDirtyAndNondirtyDeeply(1,true),
 			
 	/** If !isDeterministic then either it is the main wiki state (aSymbolRepresentingTheUniverse)
 	or it is something related to "leaving that open for possible future expansion of considering
@@ -115,10 +152,14 @@ public enum HeaderBits{
 	wikiState(s) change (toward some combo of RFPWs) that you dont have to rehash everything which calls it.
 	If isDeterministic then wikiState is (lazig (S I I) (S I I)) so its 1 hash to 1 deterministic behavior.
 	If myWikiStateIsTheMainWikiState then !isDeterministic. These TruthValues are about individual λ's.
-	*/
+	*
 	myWikiStateIsTheMainWikiState(1, true),
+	*/
 	
-	/** This is one of the first few bits so that literals cant be designed to start with the same first 128 bits
+	/** Can only store 1..128 bits of literal cbt in an id256 if HeaderBits.containsDirtyAndNondirtyDeeply in it,
+	else would have to hash it as usual for call pairs.
+	<br><br>
+	OLD... This is one of the first few bits so that literals cant be designed to start with the same first 128 bits
 	as a hash id cuz that would make treemaps (trie-like, skipping branches where theres only 1 child) slower.
 	<br><br>
 	If true, then globalId contains 1, 2, 4, 8, 16, 32, 64, or 128 bits of literal cbt.
@@ -158,7 +199,8 @@ public enum HeaderBits{
 	*/
 	rcall_myHash192IsOfMyRAndMyLIsTheRFunc(1, true),
 	
-	/** Similar to lcall and rcall, but for pair instead of L or R.
+	/** An optimization of the call (pair x).
+	Similar to lcall and rcall, but for pair instead of L or R.
 	An optimization to avoid storing (pair x) in ((pair x) y) aka (pair x y)
 	and to only store x, y, and (pair x y), but be able to generate the id of (pair x) where
 	hashing that id with the id of y generates the id of (pair x y).
@@ -189,42 +231,6 @@ public enum HeaderBits{
 	which has func param stack cacheKey and isParentsFunc. But wikibinator.Bloom has a different way of doing it.
 	*/
 	hasCachekey(1, true),
-	
-	/** If !isHigher then this is all bits of the unsigned height integer, else this is only the low n bits of it.
-	TODO should this be ignored (set to its max value?) if isHigher since it
-	might make it harder to compute without having to know how deep you are?
-	This may bits of height allows it to describe that a cbt has 1 bit, 2 bits .. 2^61 bits (about 2 exabits),
-	todo is that offby1 aka 2^60 bits 2^59 bits? verify the exact number, but somewhere around 1 exabit.
-	It doesnt store the exact bit length of the cbtBitstring, just the powOf2 it fits in
-	(and it might be smaller than that powOf2 such as if the right child is all 0s).
-	If you want to know the long size in bits (bize) of it, use RFPD cache
-	<(bize aBitstring) 1152921504606846976L> aka the claim that (bize aBitstring) returns the cbt64
-	returned by (baseTenToSignedCbt64 "1152921504606846976") but thats just a way to display
-	numbers in baseTen depending on some syntax or another which will also be derived by combos of λ,
-	where bize and baseTenToSignedCbt64 would be functions derived from combos of λ
-	then optimized using Compiled.java as in λ.getCompiled() and λ.setCompiled(Compiled).
-	*/
-	lowBitsOfHeight(7, true),
-	
-	lowBitsOfHeight_ignore6(0,false),
-	lowBitsOfHeight_ignore5(0,false),
-	lowBitsOfHeight_ignore4(0,false),
-	lowBitsOfHeight_ignore3(0,false),
-	lowBitsOfHeight_ignore2(0,false),
-	lowBitsOfHeight_ignore1(0,false),
-	
-	/** If true, then there are more digits of the height integer than fits in lowBitsOfHeight */
-	isHigher(1, true),
-	
-	/** These 2 TruthValue spaces were taken by the L and R optimizations 2021-1-8.
-	This is how much space in header is unused and is reserved for future expansion.
-	Leave these as TruthValue.unknown.
-	<br><br>
-	FIXME you cant hash before observing its bits. Are these TruthValues (2 bits each) in the
-	hash or not? and if they're in the hash, are they 1 bit each as they cant be unknown or bull?)
-	*
-	reservedForFutureExpansion(0, false),
-	*/
 	
 	/** True if this is a fake node such as random bits made up pretending to be a globalId
 	or any secureHash id which can reach those. False if have verified all the way down to leaf
@@ -264,7 +270,16 @@ public enum HeaderBits{
 	*/
 	isCbt(1, false),
 	
-	/** isCbt and contains T. A bitstring is a cbt padded with a 1 then 0s until the next powOf2,
+	/** is (S I I (S I I))? Or maybe the normed form should be one of the salt nodes, just define a symbol for it?
+	*/
+	isTheNormedFormOfEveryCallThatDoesNotHalt(1, true),
+	
+	/** Removing this cache cuz every cbt other than those which have all 0s are bitstrings,
+	and if you need to know that you can derive a containsT function
+	then use {(T and2) isCbt containsT} as an isBitstring function.
+	I'm taking this space in header for isMerkleHeader.
+	<br><br>
+	isCbt and contains T. A bitstring is a cbt padded with a 1 then 0s until the next powOf2,
 	viewing whats before that last 1 as the contents of the bitstring.
 	The id256 does not contain the length but for bitstrings up to about 1 exabit (TODO get exact number)
 	it does contain the height so you know its max size to a precision of a certain powOf2,
@@ -273,8 +288,35 @@ public enum HeaderBits{
 	or <derivedLengthFunction aBitstring itsLen F> or if RFPW <derivedLengthFunction aBitstring itsLen wikiState>.
 	aka <derivedLengthFunction aBitstring itsLen (lazig (S I I) (S I I))>
 	or <derivedLengthFunction aBitstring itsLen theMainWikiState>.
-	*/
+	*
 	isBitstring(1, false),
+	*/
+	
+	/** see (λ)λ.setHeader(long) and (λ)λ.setIsMerkleHeader(boolean).
+	If isMerkleHeader then HeaderBits.keyMask is 0xffffffffffffffffL aka -1L, and HeaderBits.valMask is 0L,
+	aka all 256 bits in an id256 are key and there is no val other than that,
+	but the header works the same way, means the same things. Its just that you have to forkEdit it
+	upwork as a merkle forest every time you OReq a TruthValue into the bloomFilter.
+	Its potentially very useful, and a good research path, for improving consistency in a p2p network
+	but at the cost of its far more expensive.
+	*
+	isMerkleHeader(1, true),
+	FIXME remove isMerkleHeader (and leave the space reserved(1,?)? since its a very slow algorithm?
+	or bring back isBitstring? Or what should use that 1 TruthValue of space?
+	and if remove isMerkleHeader, then theres λ functions about it to also remove.
+	*
+	reservedForPossibleFutureExpansion(1,false),
+	
+	/** These 2 TruthValue spaces were taken by the L and R optimizations 2021-1-8.
+	This is how much space in header is unused and is reserved for future expansion.
+	Leave these as TruthValue.unknown.
+	<br><br>
+	FIXME you cant hash before observing its bits. Are these TruthValues (2 bits each) in the
+	hash or not? and if they're in the hash, are they 1 bit each as they cant be unknown or bull?)
+	*
+	reservedForFutureExpansion(0, false),
+	*/
+
 	
 	/** (L x (R x)) equals x, forall x.
 	<br><br>
@@ -296,16 +338,17 @@ public enum HeaderBits{
 	*
 	Id.java: public static final Word idKeyOfTheNormedFormOfAnythingThatDoesNotHalt = null;
 	*/
-	returnValOfLeftChildEqualsReturnValOfRightChild(1, false),
+	eq_returnValOfLeftChildEqualsReturnValOfRightChild(1, false),
 	
-	/** true if left child is same forest shape as right child.
+	/** true if left child is same forest shape as right child AND their isNondeterministic bit equals
+	(like each node has 3 merkle childs: L R isNondeterministic).
 	This isnt much useful if you have the 192 bits of secureHash, since you just compare those,
 	but hash ids are lazyEvaled and dedup is lazyEvaled so λ.java instances can use this
 	to say that some things equal or not equal in forest shape.
 	This is not the same as returnValOfLeftChildEqualsReturnValOfRightChild kind of equality
 	which is equality of the forest shape of what each child returns (or returns itself if child isHalted).
 	*/
-	leftAndRightForestShapesEqual(1, false);
+	eq_leftAndRightForestShapesAndNondetBitEqual(1, false);
 	
 	/** number of 2-bit TruthValues */
 	public final int tvs;
@@ -331,7 +374,14 @@ public enum HeaderBits{
 		return (byte)(h>>curriesAreLeaf.ordinal());
 	}
 	
-	public static final int imaskOfOpByte = curriesAreLeaf.myimask|isNondeterministic.myimask;
+	/** like long is 32 truthvalues with its high 32 and low 32 bits, get a uint16 of high 8 and low 8 bits.
+	Char is java's only uint16 type.
+	*/
+	public static char opTwobyte(long header){
+		return twobyteAt(header, curriesAreLeaf.ordinal());
+	}
+	
+	public static final int imaskOfOpByte = curriesAreLeaf.myimask|isDirty.myimask;
 	
 	public static byte opByte(long h) throws NotAllYesOrNo{
 		//TODO optimize by computing it directly from the long with no deeper function calls
@@ -351,6 +401,20 @@ public enum HeaderBits{
 	}
 	
 	public static final int imaskOfHeightByte = lowBitsOfHeight.myimask|isHigher.myimask;
+	
+	/** like long is 32 truthvalues with its high 32 and low 32 bits, get a uint16 of high 8 and low 8 bits.
+	Char is java's only uint16 type.
+	*/
+	public static char heightTwobyte(long header){
+		return twobyteAt(header, lowBitsOfHeight.ordinal());
+	}
+	
+	/** like long is 32 truthvalues with its high 32 and low 32 bits, get a uint16 of high 8 and low 8 bits.
+	Char is java's only uint16 type.
+	*/
+	public static char twobyteAt(long header, int shift){
+		return (char)( ((header>>(shift+24))&0xff00) | ((header>>shift)&0xffL) );
+	}
 	
 	public static byte heightByte(long h) throws NotAllYesOrNo{
 		//TODO optimize by computing it directly from the long with no deeper function calls
@@ -372,6 +436,12 @@ public enum HeaderBits{
 	/** Only works where HeaderBits.tvs==1. */
 	public TruthValue tv(λ x){
 		return tv(x.header());
+	}
+	
+	/** Only works where HeaderBits.tvs==1 and [the value is TruthValue.yes or TruthValue.no else throws Unknown or Bull] */
+	public boolean z(λ x) throws Unknown, Bull{
+		//TODO optimizer
+		return tv(x.header()).z();
 	}
 	
 	/** Only works where HeaderBits.tvs==1.
@@ -433,6 +503,13 @@ public enum HeaderBits{
 	}
 	public static final long keyMask = ~valMask;
 	
+	/** all 1s. See HeaderBits.isMerkleHeader. *
+	public static final long valMask_if_merkleHeader = -1L;
+	
+	/** all 0s. See HeaderBits.isMerkleHeader. *
+	public static final long keyMask_if_merkleHeader = ~valMask_if_merkleHeader;
+	*/
+	
 	//FIXME 2021-1-9 I swapped yesMask and noMask so (int)header would be the yes bits.
 	
 	public static final long yesMask = 0x00000000ffffffffL;
@@ -476,20 +553,57 @@ public enum HeaderBits{
 		long headerKeyA = headerA&keyMask;
 		long headerKeyB = headerB&keyMask;
 		
-		TODO use opByteOf2ChildOpBytes and heightByteOf2ChildHeightBytes
+		/*TODO use opByteOf2ChildOpBytes and heightByteOf2ChildHeightBytes
 		
 		TODO finish this func, then finish (long)Id.headerKeyOf2Headers(long,long),
 		then hook it into λ.idKey().
+		*/
+		throw new RuntimeException("TODO");
 	}
 	
 	public static byte opByteOf2ChildOpBytes(byte opByteA, byte opByteB){
-		"TODO is there another function i wrote some code for but didnt finish"
-		"TODO maybe cache this in a byte[1<<16]"
+		throw new RuntimeException("TODO");
+		//"TODO is there another function i wrote some code for but didnt finish"
+		//"TODO maybe cache this in a byte[1<<16]"
 	}
 	
 	public static byte heightByteOf2ChildHeightBytes(byte heightByteA, byte heightByteB){
-		TODO
-		"TODO maybe cache this in a byte[1<<16]? Probably not cuz this is simpler than opByteOf2ChildOpBytes"
+		throw new RuntimeException("TODO");
+		//"TODO maybe cache this in a byte[1<<16]? Probably not cuz this is simpler than opByteOf2ChildOpBytes"
+	}
+	
+	/** Range 0-6. Number of params more to curry before this would eval.
+	If 0, is now evaling. If 6, its u (aka the universal function).
+	*/
+	public static int opCur(byte op){
+		//TODO optimize using byte[256]? Or is this faster?
+		int i = (op&0x7f); //0..127
+		if(i == 0) return 0;
+		if(i == 1) return 6; //is u
+		return opCur((byte)(i>>1))-1; //TODO verify this is not offby1
+	}
+	
+	public static boolean opIsHalted(byte op){
+		//TODO optimize by not computing which nonzero value cur is, just is it 0 or not.
+		return opCur(op)!=0;
+	}
+	
+	/** This is what happens when you call an evaling on an evaling,
+	or a halted on an evaling, or an evaling on a halted.
+	If it just started to eval, then its op would be in range 64-127 (or that minus 128 as the isDirty bit).
+	*/
+	public static boolean areLow7BitsOfOpAll0(byte op){
+		return (op&0x7f)==0;
+	}
+	
+	public static boolean opIsLeaf(byte op){
+		return (op&0x7f)==1;
+	}
+	
+	public static boolean isLeaf(λ x){
+		//its 1 of the 7 bits of curriesAreLeaf which are the 7 low bits of opByte
+		//TODO optimize it can be done with tv(x) instead of getting the whole opByte, or more directly a mask here.
+		return (opByte(x)&1)==1;
 	}
 	
 	HeaderBits(int tvs, boolean isPartOfMerkleForest){
@@ -506,7 +620,7 @@ public enum HeaderBits{
 		int tvSum = 0;
 		for(HeaderBits h : HeaderBits.values()){
 			tvSum += h.tvs;
-			lg(h+" "+h.tvs+" ("+tvSum+") ordinal="+h.ordinal()+" mask="+Text.intTo32Chars(h.imask)+" "+h.isPartOfMerkleForest);
+			lg(h+" "+h.tvs+" ("+tvSum+") ordinal="+h.ordinal()+" mask="+Text.intTo32Chars(h.myimask)+" "+h.isPartOfMerkleForest);
 		}
 	}
 	

@@ -7,9 +7,9 @@ import java.lang.ref.SoftReference;
 //import static wikibinator.impl.Cache.*;
 import java.util.function.Supplier;
 
-
-
+import wikibinator.$λ;
 import wikibinator.Compiled;
+import wikibinator.HeaderBits;
 import wikibinator.WikiState;
 import wikibinator.λ;
 
@@ -58,7 +58,7 @@ public class SimpleFn implements λ{
 		No problem, let’s just set it to -XX:SoftRefLRUPolicyMSPerMB=0 and the javadoc is suddenly true again.
 	UNQUOTE.
 	Also, least recently used will probably be more efficient.
-	*/
+	*
 	protected SoftReference<λ> cacheAnyRet;
 	TODO test SoftReference caching does it work reliably (not run out of memory ever)
 	AND benchmark it against leastRecentlyUsed [map of λ nonhalted -> λ halted] cache.
@@ -77,6 +77,7 @@ public class SimpleFn implements λ{
 	and those will become garbcolable in order of leastRecentlyUsed.
 	So put the touch() func in λ.java interface and the e() func andOr e(long maxSpend)
 	funcs will automatically call touch.
+	*/
 	protected long timeLastUsed;
 	
 	//public final byte op;
@@ -126,8 +127,9 @@ public class SimpleFn implements λ{
 		//this.compiled = compiled;
 	}*/
 	
-	public SimpleFn(byte op, λ func, λ param){
-		this.op = op;
+	/** long header is described by HeaderBits aka is 32 TruthValues. */
+	public SimpleFn(long header, λ func, λ param){
+		this.header = header;
 		this.func = func;
 		this.param = param;
 	}
@@ -136,7 +138,9 @@ public class SimpleFn implements λ{
 
 	//public fn R(){ return lazyDownloadParam.get(); }
 
-	public byte op(){ return op; }
+	public byte op(){
+		return HeaderBits.opByte(header);
+	}
 
 	public Compiled compiled(){ return compiled; }
 	
@@ -152,12 +156,12 @@ public class SimpleFn implements λ{
 		//FIXME add <func,param,return> to Cache just before return, if not returning from Cache already
 		
 		byte opOfCall = funcOpAndParamOpToParentOp(func.op(), param.op()); //same as new SimpleFn(this,param).op()
-		if(opIsHalted(opOfCall)) return cp(func,param);
+		if(HeaderBits.opIsHalted(opOfCall)) return cp(func,param);
 		
 		//already handled the isHalted kinds, so everything here has at least 6 params
 		//or is an evaling called on a halted or a halted called on an evaling or an evaling called on an evaling
 		//in which case its low 7 bits of that byte are 0.
-		if(areLow7BitsOfOpAll0(opOfCall)){
+		if(HeaderBits.areLow7BitsOfOpAll0(opOfCall)){
 			throw new RuntimeException("TODO");
 			//return e().e(param.e()); //eval this and param first
 		}
@@ -188,13 +192,14 @@ public class SimpleFn implements λ{
 		//	return z;
 		//break;
 		case opReflect00:
-			return z.isLeaf();
+			return z.isLeaf()?T:F;
 		case opReflect01:
-			return z.isDeterministic();
+			//FIXME should this be isDirty or isDirtyDeep or some clean and some deep (see that HeaderBits thing).
+			return z.isDirty()?T:F;
 		case opReflect10:
-			return z.l();
+			return z.L();
 		case opReflect11:
-			return z.r();
+			return z.R();
 		//	if(x.isLeaf()){
 		//		return z.isLeaf() ? T : F;
 		//	}else{ //!x.isLeaf
@@ -206,56 +211,103 @@ public class SimpleFn implements λ{
 			//Typeval is same as pair func but is useful as a semantic. same as pair func but its useful as a semantic. 
 			return z.e(x).e(y);
 		//break;
-		case opSecondLastInList00: case opSecondLastInList01: case opSecondLastInList10: case opSecondLastInList11:
+		case opSecondLastInList00:
+			//maybe last in list? but only really need an op for second last to get funcBody. Can derive the others efficiently.
+			//Maybe isLinkedList?
+			return reservedForPossibleFutureExpansion();
+		case opSecondLastInList01:
 			//GetFuncBody aka getSecondLastInList
 			if(z.R().R().isLeaf()) return z.L();
 			//return this.e(z.R()); //this fn (in the call <this,z>) is a function that gets second last in a linkedlist
 			//return secondLastInList.e(z.R());
 			return GetFuncBody.e(z.R()); //recurse
-		//break;
+		case opSecondLastInList10:
+			//maybe third last in list? but only really need an op for second last to get funcBody. Can derive the others efficiently.
+			//Maybe isLinkedList?
+			return reservedForPossibleFutureExpansion();
+		case opSecondLastInList11:
+			//maybe fourth last in list? but only really need an op for second last to get funcBody. Can derive the others efficiently.
+			//Maybe isLinkedList?
+			return reservedForPossibleFutureExpansion();
 		case opCurry00: case opCurry01:
-			//if(x.isLeaf()){ //x is counter and has counted down to 0 (such as (T (T (T u))) is 3 and u is 0. Eval.
-			
-			if(1<2) throw new RuntimeException("FIXME should that be x.R().isLeaf(), and what if x is already leaf? this is an offby1error");
+			//x (the first 0 in opCurry00 and opCurry01)
+			//is counter and has counted down to 0 (such as (T (T (T u))) is 3 and u is 0. Eval.
 			λ nextLinkedList = Pair.e(z).e(y); //y is linkedList. z is nextParam.
 			λ funcBody = GetFuncBody.e(nextLinkedList);
 			return funcBody.e(nextLinkedList);
-			//FIXME??? offby1error in size of nextLinkedList including nextParam or not? offby1error somewhere else?
-			
 		case opCurry10: case opCurry11:
-			//}else{ //has not counted down to 0 yet, so count down 1 more and add nextParam to linkedlist
-			
-			λ nextLinkedList = Pair.e(z).e(y); //y is linkedList. z is nextParam.
+			//x (the first 0 in opCurry00 and opCurry01) is not leaf,
+			//which means it has not counted down to 0 yet, so just remember another param into the linkedlist,
+			//which will opCurry01 later (the 1 being the linkedlist which is of course not leaf).
+			nextLinkedList = Pair.e(z).e(y); //y is linkedList (second last thing in it is funcBody). z is nextParam.
 			λ counterAsOneLess = x.R();
-			return Curry.e(counterAsOneLess).e(nextLinkedList); //wait for next param to curry again or eval
-			//FIXME??? offby1error in size of nextLinkedList including nextParam or not? offby1error somewhere else?
-			
-			
-			/*
-			//Curry x y z //(Curry counter linkedList nextParam)
-			//--ifItsEnoughCurriesToEval--> (LastInList next_linkedList next_linkedList).
-			λ nextLinkedList = Pair.e(z).e(y); //y is linkedList. z is nextParam.
-			if(x.isLeaf()){ //x is counter and has counted down to 0 (such as (T (T (T u))) is 3 and u is 0. Eval.
-				if(1<2) throw new RuntimeException("FIXME should that be x.R().isLeaf(), and what if x is already leaf? this is an offby1error");
-				λ funcBody = GetFuncBody.e(nextLinkedList);
-				//FIXME??? offby1error in size of nextLinkedList including nextParam or not? offby1error somewhere else?
-				return funcBody.e(nextLinkedList);
-			}else{ //has not counted down to 0 yet, so count down 1 more and add nextParam to linkedlist
-				λ counterAsOneLess = x.R();
-				//FIXME??? offby1error in size of nextLinkedList including nextParam or not? offby1error somewhere else?
-				return Curry.e(counterAsOneLess).e(nextLinkedList); //wait for next param to curry again or eval
-			}
-			*/
+			return Curry.e(counterAsOneLess).e(nextLinkedList);
 		//break;
-		case opWiki00: case opWiki01: case opWiki10: case opWiki11:
+		case opWiki00: //(λ λ λ λ λ λ) is wiki, so (λ λ λ λ λ λ x) is (wiki x).
+			//call the wiki on a param. if !isDirty aka isDeterministic, then wiki is (S I I (S I I)),
+			//else wiki is whatever many people and computers converge toward some consistent set of RFPD cache entries about
+			//as computed by (UnaryOperator<λ>)WikiState.wiki
+			
 			/*before calling wiki function, check isDirty(byte) and if !isDirty then eval to (S I I (S I I)). call fnThatInfiniteLoopsForAllPossibleParams=(S (T (S I I)) (T (S I I))) or something like that maybe using lazig on 2 of (S I I)... or simply call (S I I) on itself aka callParamOnItself.e(callParamOnItself)... or just inline it as S.e(I).e(I).e(S.e(I).e(I)); */
 			if(!func.isDirty()) infloop(); //return S.e(I).e(I).e(S.e(I).e(I)); //infloop so anything that halts is deterministic
 			return WikiState.wiki.apply(param); //allow nondeterminism (forkEdit wiki) as long as (L x (R x)) equals x, forall x.
+			
+		case opWiki01:
+			//cleanCall (todo rename that op byte to cleanCall)
+			
+			/*FIXME this needs 2 params of op space since it has 2 params.
+			(if it had 3 params it would need 4 params of op space, and if it takes 1 param it needs only 1 param of op space)
+			Theres space in opSecondLastInList* but todo rename that since its no longer just opSecondLastInList.
+			TODO rename detcall to cleancall since dirty means nondeterministic and clean means deterministic.
+			*/
+			
+			//cleanCall. (cleanCall y z) -> (setCleanDeep (setCleanDeep y (setCleanDeep z))), but without creating the nondet forms in the middle steps,
+			//due to that call being put together by nondeterministic stuff such as by nondeterministic_S_lambda,
+			//as an optimization for nondeterministic λs which contain deterministic λs to call those on eachother
+			//without the middle step of becoming nondeterministic.
+			
+			//what this returns is already clean deep, cuz clean deep called on clean deep is always clean deep.
+			return y.setDirtyDeep(false).e(z.setDirtyDeep(false));
+			
+			/* TODO maybe put the op described in this comment in one of the other reserved opcode spaces?
+			//maybe this op should be flipDeepIfAlreadyAllTheSameDetVsNondetDeeply, like in (λ)λ.dirtyDeep(boolean)?
+			//The purpose of that is the merkle hash is constant, and only changes header bits,
+			//when everything reachable thru l() and r() recursively is all dirty or all !dirty.
+			//dirty means nondeterministic. !dirty means deterministic.
+			//See HeaderBits.containsDirtyAndNondirtyDeeply
+			return reservedForPossibleFutureExpansion();
+			*/
+			
+		case opWiki10:
+			//setdet
+			//forkEdit param to be deterministic. A deterministic or nondeterministic func can do this,
+			//since the result is deterministic. TODO does that mean that deterministic can only have a param
+			//thats already deterministic and just return that param as it is?
+			
+			//FIXME swap opWiki00 with opWiki01 so the last param (the last 0 or 1 aka param 5 of 6 is leaf or is any nonleaf)
+			//it aligns with HeaderBits.isNondeterministic or is it .isDeterministic?
+			
+			return z.setDirty(false);
+			
+		case opWiki11:
+			//setnondet
+			//forkEdit param to be nondeterministic. This must infloop if func is deterministic.
+			
+			//FIXME swap opWiki00 with opWiki01 so the last param (the last 0 or 1 aka param 5 of 6 is leaf or is any nonleaf)
+			//it aligns with HeaderBits.isNondeterministic or is it .isDeterministic?
+			
+			if(!func.isDirty()) infloop();
+			return z.setDirty(true);
+			
 		//break;
 		default:
 			throw new RuntimeException("this can never happen but is here in case java doesnt know that");
 		}
 	});
+	
+	public λ setNondeterministic(boolean nondeterministic){
+		throw new RuntimeException("UPDATE: merkle hash might need to include isDeterministic vs nondeterministic bit, at least in some cases (or all?) cuz parent.isDeterministic can differ from its 2 child isDeterministics as nondet can call det but if det calls nondet then (todo choose a design) it either recursively converts the nondet to det before the det sees it, or it must infloop??? OLD... TODO forkedit this λ to have that TruthValue in its header, and remember 2 λs together so each can efficiently return the other without having to keep creating more of them, and in ids isNondeterministic should be part of key and merkle but should not be input to the hash algorithm and should be able to just flip that bit in the header, in forkedited λ, and set other parts to TruthValue.unknown since the behaviors of determinism and nondeterminism can differ deeply (cuz wiki infloops or not), so only differs in header not in the 192 bits of hash_or_literal. It has to be part of key since they are 2 different forest nodes. A forest node 'is the same forest shape' (todo update that part of Headerbits, theres a truthvalue for it) if it has the same L and R childs recursively AND the same isNondeterministic bit/truthvalue.");
+	}
 
 	public λ g(long binheapIndex){
 		throw new RuntimeException("TODO");
@@ -266,6 +318,38 @@ public class SimpleFn implements λ{
 	}
 
 	public void setCompiled(Compiled newCompiled){
+		throw new RuntimeException("TODO");
+	}
+
+	public λ e(){
+		throw new RuntimeException("TODO");
+	}
+
+	public $λ e(long maxSpend){
+		throw new RuntimeException("TODO");
+	}
+
+	public λ f(λ param){
+		throw new RuntimeException("TODO");
+	}
+
+	public long header(){
+		throw new RuntimeException("TODO");
+	}
+
+	public void headerOreq(long oreq){
+		throw new RuntimeException("TODO");
+	}
+
+	public λ flip(){
+		throw new RuntimeException("TODO");
+	}
+
+	public λ setDirty(boolean dirty){
+		throw new RuntimeException("TODO");
+	}
+
+	public λ setDirtyDeep(boolean dirtyDeep){
 		throw new RuntimeException("TODO");
 	}
 

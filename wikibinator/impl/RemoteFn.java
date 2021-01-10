@@ -2,6 +2,7 @@
 package wikibinator.impl;
 import java.util.function.Supplier;
 
+import wikibinator.$λ;
 import wikibinator.Compiled;
 import wikibinator.λ;
 
@@ -70,6 +71,54 @@ public class RemoteFn implements λ{
 	}
 
 	public λ G(long cbtBinheapIndex){
+		throw new RuntimeException("TODO");
+	}
+
+	public λ e(){
+		throw new RuntimeException("TODO");
+	}
+
+	public $λ e(long maxSpend){
+		throw new RuntimeException("TODO");
+	}
+
+	public λ f(λ param){
+		throw new RuntimeException("TODO");
+	}
+
+	public long header(){
+		throw new RuntimeException("TODO");
+	}
+
+	public void headerOreq(long oreq){
+		throw new RuntimeException("TODO");
+	}
+
+	public λ setHeader(long header){
+		throw new RuntimeException("TODO");
+	}
+
+	public λ setIsMerkleHeader(boolean isMerkleHeader){
+		throw new RuntimeException("TODO");
+	}
+
+	public λ flip(){
+		throw new RuntimeException("TODO");
+	}
+
+	public λ dirty(boolean dirty){
+		throw new RuntimeException("TODO");
+	}
+
+	public λ dirtyDeep(boolean dirtyDeep){
+		throw new RuntimeException("TODO");
+	}
+
+	public λ setDirty(boolean dirty){
+		throw new RuntimeException("TODO");
+	}
+
+	public λ setDirtyDeep(boolean dirtyDeep){
 		throw new RuntimeException("TODO");
 	}
 
