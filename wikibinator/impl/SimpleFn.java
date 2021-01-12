@@ -3,6 +3,7 @@ package wikibinator.impl;
 import static wikibinator.impl.ImportStatic.*;
 
 import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 //import static wikibinator.fn.*;
 //import static wikibinator.impl.Cache.*;
 import java.util.function.Supplier;
@@ -15,7 +16,60 @@ import wikibinator.λ;
 
 public class SimpleFn implements λ{
 	
-	/** The purpose of SoftReference is for JVM to decide when to garbcol things
+	TODO /** UPDATE: Use WeakReference of what each λ (call) evals to (when thats observed)
+	and keep many parent λ (whose L() is that call and whose R() is what it evals to)
+	in some sorted collection (such as minheap or treemap) sorted by λ.garbcolOrder,
+	so what those WeakReference point to wont be garbcoled until the minheap
+	allows garbcol of the statement that the eval equals the return,
+	and keep count of estimated total memory (as each λ adds some, especially if it wraps a blob)
+	and garbcol in order of that minheap until get down to maybe 90% of max memory allowed,
+	continuously, and when change λ.garbcolOrder (every time its accessed, like by touch time)
+	then move it in the minheap. The minheap must not include anything that cant be garbcoled
+	due to having incoming pointers such as from other λ,
+	so TODO create a class just for this which has just those 2 ptrs to λ,
+	or maybe just the 1 ptr to the R() λ (the return value).
+	Look at how CacheFuncParamReturn.java did it in occamsfuncer,
+	but there was still more basic work to do to that.
+	Since the minheap stores RFPs (RFPD? or RFPW? Or just RFP?),
+	and RFPs of nondeterministic wikiState,such as a claim that (wiki "hello")->"world" aka <"world" (wiki "hello")>,
+	can not always be rederived from other known things as the wiki can have some of the physical world's state in it,
+	but in other ways many things can be downloaded again from various peers or rederived from
+	combos of things they know as the wiki has to be 1 function (forkEdited by millions of people and computers at once),
+	that anyone can call (including recursively a wiki call can call wiki...)
+	therefore... the minheap needs some kind of redesign to not lose the primary storage source of any data
+	unless its near certain that question will never be asked again such as
+	making up a random number to prefix things with that are meant to be temp calculations
+	and not telling anyone that random number and forgetting it yourself,
+	for example a "salt" param (not HeaderBits.isSalt which is a lower level, but a salt thats a cbt)
+	which gets forkEdited by 1 of 2 unitary functions to vary itself deterministicly down
+	paths of function calls so that nondeterministic calls (such as spend, to limit compute resources recursively, in wiki)...
+	so such calls can be repeatable by whoever has such a RFP cache but can garbcol that without
+	having to store it in longterm public space, but it still being part of the wiki,
+	just a part that its exponentially unlikely that anyone will ever ask about again (not even you who created it and forgot it)
+	so basically you can make up random addesses for temp vars to do temp calculations
+	and in abstract math define them as part of the wiki function, such as <retValOfXYZ (wiki ["varNameXYZ" aRandomNumber "temp"])>,
+	and its still true, in abstract math, that forever after that
+	anyone in the world who calls (wiki ["varNameXYZ" aRandomNumber "temp"]) gets the return value retValOfXYZ,
+	and you may actually share that RFP with them so it works there, and the both of you 2 may forget it,
+	or store it longer, but others are exponentially unlikely to ever make that call,
+	and the logic of it is, "x implies y" is true if x is always false, so you never have to do y,
+	but you actually can do y its just an expensive to store things longterm.
+	Its very very cheap in wikibinator to sync in turing-complete ways.
+	It could in theory sync the whole internet at gaming-low-lag. But storage is expensive.
+	It will have 99.9999999% binary efficiency for storage,
+	even though storage purely in id256s has 25% binary efficiency,
+	but the same id256 can be derived from a bitstring of any size such as if you sent someone a megabyte bitstring
+	with an id256 of that megabyte, you dont have to send the internal nodes of the binary forest
+	since they can be derived from that megabyte. But storage in general is just expensive longterm
+	compared to how much data computers create and delete in their memory per second such as 1 teraflop GPU.
+	Also, id256s are lazyEvaled so you only need the long (64 bit) header in memory and can dedup most things,
+	just cant efficiently dedup blobs without the ids, but can dedup things above the blobs using == on blob wrappers.
+	The id256s are perfect dedup by binary forest shape but multiple things can have the same return value.
+	<br><br>
+	<br><br>
+	<br><br>
+	<br><br>
+	OLD: The purpose of SoftReference is for JVM to decide when to garbcol things
 	based on how much memory is available as its defined as a cache. Nondeterministic things in
 	wikiState will need something more than this since they cant be derived again without at
 	least some parts of that. On the other hand, deterministic things can all be derived only from λ
@@ -32,7 +86,6 @@ public class SimpleFn implements λ{
 	FIXME I wrote the below paragraph wrong. The parent knows its 2 childs eval to the same thing,
 	but the SoftReference<λ> goes in parent.l and points at parent.r,
 	so the parent tells parent.l about parent.r. TODO fix the below text.
-	When any λ parent has !parent.l.isHalted and parent.r.isHalted
 	and parent.returnValOfLeftChildEqualsReturnValOfRightChild
 	THEN can set parent.cacheAnyRet = new SoftReference(parent.r),
 	which is a RFPD cache aka return func param isDeterministic,
@@ -77,8 +130,18 @@ public class SimpleFn implements λ{
 	and those will become garbcolable in order of leastRecentlyUsed.
 	So put the touch() func in λ.java interface and the e() func andOr e(long maxSpend)
 	funcs will automatically call touch.
-	*/
+	*
 	protected long timeLastUsed;
+	*/
+	protected long garbcolOrder;
+	
+	/** used with garbcolOrder and a minheap of λs that stays sorted by λ.garbcolOrder,
+	able to find the λ with smallest λ.garbcolOrder. See comment of λ.garbcolOrder.
+	Its "any return" instead of "the return" cuz it might be multiple before dedup
+	or if in a p2p network and it hasnt yet converged to at most 1 return value per call.
+	In the abstract math there is exactly 1 return value for each call.
+	*/
+	protected WeakReference<λ> cacheAnyRet;
 	
 	//public final byte op;
 	
