@@ -1,6 +1,8 @@
-package modelofallpossibleaxioms;
+package modelofallpossibleaxioms.old;
 
 import java.util.function.Consumer;
+
+import modelofallpossibleaxioms.λ;
 
 /** Immutable. Color 0 means unknown color and does not count against having multiple colors at once,
 such as a node can simultaneously be color 0 (unknown what color it is) and color 3

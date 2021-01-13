@@ -1,4 +1,6 @@
-package modelofallpossibleaxioms;
+package modelofallpossibleaxioms.old;
+
+import modelofallpossibleaxioms.λ;
 
 /** Immutable. */
 public class MultiColoredλ extends RuntimeException{

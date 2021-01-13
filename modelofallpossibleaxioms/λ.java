@@ -1,10 +1,28 @@
+/** Ben F Rayfield offers this software opensource MIT license */
 package modelofallpossibleaxioms;
 
-/** immuable trinary forest node where all paths lead to leaf */
+import immutable.util.TruthValue;
+
+/** immuable trinary forest node where all paths lead to leaf.
+TODO undecided if TruthValue (instead of color) will be a child (part of merkle forest) vs
+used in a separate map(s) of trinaryForestNode to TruthValue,
+and am undecided if will use TruthValue instead of color
+(such as 32 TruthValues in wikibinator HeaderBits long header,
+some or all of those being part of a color or a whole color?
+but trinary forest nodes are a lower level than wikibinator opcodes).
+*/
 public interface λ{
 	
 	/** isLeaf */
 	public boolean a();
+	
+	/** TODO part of merkle childs? instead of color.
+	Each axiom is 2 functions of trinary forest node x to 2 trinary forest nodes y and z,
+	where if x is true then that implies y is true and z is false,
+	and forall b forall c: if b and c are true then <trinaryForestLeaf b c> is true,
+	and trinaryForestLeaf is true.
+	*/
+	public TruthValue tv();
 	
 	/** vmState, 1 of 3 trinary forest childs. When vmState is leaf, func and param can be anything,
 	so to start a lambda call of anything on anything (even the stuff found inside vmState,
