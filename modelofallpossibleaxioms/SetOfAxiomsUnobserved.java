@@ -4,7 +4,7 @@ import java.util.Set;
 import java.util.function.BinaryOperator;
 import java.util.function.UnaryOperator;
 
-public interface SetOfAxioms{
+public interface SetOfAxiomsUnobserved{
 	
 	public λ trinaryForestLeaf();
 	
