@@ -15,6 +15,46 @@ so if there will be bull later then it can be proven that theres bull now if you
 
 UPDATE: https://github.com/benrayfield/wikibinator/blob/main/mutable/util/UndoMem.java will allow undo per 32 bits of memory back around 100 million writes, even if the writes depend on current contents of megabytes of memory at the time such as branching to do one thing or another, to do some graphics or sound op, copy a range of memory, etc... If it "runs out of gas" during that recursively, it will be able to undo back to any chosen point and continue from there.
 
+FIXME conflicts with "all possible axioms are: trinaryForestNode (aka tfn), (axiomX T tfnZ)->thisTfnIsTrue and (axiomX F tfnZ)->thisTfnIsFalse and forall tfnA forall tfnB: <tfnLeaf tfnA tfnB>".
+
+Use "all possible axioms are: trinaryForestNode (aka tfn), (axiomX T tfnZ)->thisTfnIsTrue and (axiomX F tfnZ)->thisTfnIsFalse and forall tfnA forall tfnB: <tfnLeaf tfnA tfnB>" to write those 2 questions (predicate-like but taking no param, just provable as true or false if you have infinity cubed time and memory or something like that.
+
+I dont expect to actually prove if p equals np or not, but I do want the axiom system to be flexible enough to ask the question to infinite precision and the question is a specific trinary forest node which takes about infinity cubed time and memory to answer.
+
+Looking for a consistent model of the space of all possible axioms, but I'm uncertain if it can handle these exists and !exists recursions. It will be able to make the statement in the trinary forest nodes (which are a lower level than the lambda call pairs in the binary forest nodes of wikibinator, which will implement the wikibinator opcodes)... but the axioms would only work if there can be a trinary forest node for pEqualsNp and a node for pNotEqualsNp and at least 1 of them could be derived if you had infinity cubed amount of compute cycles and memory.
+```
+pEqualsNp IFF[
+	//verifyNpSolverOnASubsetSum is a lambda that curries 3 params and emulates another lambda for a certain number of steps
+	//and returns T or F depending if it found a subset of integers (excluding the first) that sum to the first of those integers.
+	//(verifyNpSolverOnASubsetSum maxSteps aPossibleNpSolver subsetSumQuestion) -> T or F, always halts in maxSteps.
+	existsNonnegInteger<p>[ //NP questions of n nodes can be answered in bigO(n^p) if pEqualsNp
+		existsLambda<aPossibleNpSolver>[
+			//I can map 1-to-1 between integers and all unique lambdas
+			//(max 5 curries, uniqueforestnodesatheight aka ufnah(n)=ufnah(n-1)^2+1
+			//but skipping those with more than 5 curries.
+			//Or can dovetail using fntape in order of kolmogorovComplexity andOr computeCycles and mem.
+			notExistsPositiveInteger<subsetSumQuestion>[
+				inputBitstringSize = (bitstringLen subsetSumQuestion);
+				maxSteps = (exponent inputBitstringSize p);
+				return !(verifyNpSolverOnASubsetSum maxSteps aPossibleNpSolver subsetSumQuestion);
+			]
+			//Could also write the following as !exists of !(verifyNpSolverOnA ... estion).
+			//My axiom system seems only able to have exists and !exists statements, so yes do that.
+			//forallPositiveInteger<subsetSumQuestion>[
+			//	//view the integer as a square array
+			//	//of b=floor(log2(subsetSumQuestion)) integers of b bits each,
+			//	//and the first of those integers is the sum in question,
+			//	//and the question is does any subset of the other b-1 integers sum to that.
+			//	//The following always returns T or F :
+			//	inputBitstringSize = (bitstringLen subsetSumQuestion);
+			//	maxSteps = (exponent inputBitstringSize p);
+			//	return (verifyNpSolverOnASubsetSum maxSteps aPossibleNpSolver subsetSumQuestion)
+			//]
+		]
+	]
+]
+```
+
 Here's the 32 TruthValues that will be 64 bits in every id256. An id is a godel-number-like statement...
 
 https://github.com/benrayfield/wikibinator/blob/main/wikibinator/HeaderBits.java 2021-1-10:
