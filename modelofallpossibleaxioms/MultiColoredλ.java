@@ -1,5 +1,6 @@
 package modelofallpossibleaxioms;
 
+/** Immutable. */
 public class MultiColoredλ extends RuntimeException{
 	
 	public final λ node;

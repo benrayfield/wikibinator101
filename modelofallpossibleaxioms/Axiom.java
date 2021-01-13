@@ -1,8 +1,14 @@
 package modelofallpossibleaxioms;
 
-/** An axiom can be a set of axioms by using more colors or deeper patterns of trinary forest nodes.
+import java.util.function.ToIntFunction;
+
+/** Immutable. An axiom can be a set of axioms by using more colors or deeper patterns of trinary forest nodes.
 Axioms are consistent as long as no possible combo of calling (λ)node(λ,λ,λ) and next(λ)
 leads to more than 1 color for the same λ.
+<br><br>
+An axiom must return instantly aka bigO(1), which does a tiny amount of work
+that can be divided from any huge amount of work similar to pushemu, popemu, debugStepInto, and debugStepOver,
+while still being turingComplete and potentially transfinite.
 */
 public interface Axiom{
 	
@@ -20,18 +26,19 @@ public interface Axiom{
 	which starts as color 0 (unknown what color it is) for every λ
 	then can change at most once to some nonzero color per λ since a λ can have at most 1 color.
 	*/
-	public Coloredλ next(VM vm, λ x);
+	public Coloredλ next(ToIntFunction<λ> colors, λ x);
+	//public Coloredλ next(VM vm, λ x);
 	
 	/** statefully modifies VM instead of just returning a Coloredλ for how it would be modified,
 	and may be more efficient than that.
-	*/
+	*
 	public default λ Next(VM vm, λ x) throws MultiColoredλ{
 		Coloredλ c = next(vm,x);
 		λ fn = c.fn();
 		int color = c.color();
 		vm.setColor(fn, color);
 		return fn;
-	}
+	}*/
 	
 	public int colors();
 	

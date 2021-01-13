@@ -15,8 +15,9 @@ public enum Syty{
 	or such as in <z x y ?> which means "z = (x y) when wikiState=?".
 	If you say <? x y> to someone, they might say <(x (x x)) x y> to you if its true that (x (x x)) = (x y),
 	and they might also say <abjsdf (x (x x))> and <abjsdf x y>.
-	*/
+	*
 	allPossibilities,
+	*/
 	
 	/** Example: !x means all possible forests of call pairs which are not the forest of call pairs called x.
 	Example: !? means no possibilities (and therefore causes TruthValue.bull in everything which depends on it)
@@ -95,18 +96,15 @@ public enum Syty{
 	*/
 	curryList,
 	
-	/** Example: [a b c]
-	means (pair a (pair b (pair c λ)))
-	means {a {b {c λ}}}... 	UPDATE: I'm taking {...} to mean sCurryList cuz its used far more often.
-	TODO? If write it as [a b c λ] instead of [a b c] then could represent pair of x y as [x y]
-	since [a b c λ] is [a [b [c λ]]].
-	That would make it more useful for cbts (complete binary tree of T or F as bitstring), like...
+	/** Example: [a b c λ] means [a [b [c λ]]] aka (pair a (pair b (pair c λ))).
+	Example: [a b c] means [a [b c]] aka (pair a (pair b c)).
+	Bitstring and cbt examples...
 	[[[T F][T T]][[F F][T F]]] aka the bitstring 101100 (excluding 100000... padding up to next powOf2),
 	and supporting bitstrings of unlimited size such as exabit in theory.
 	[[T F][T T]] is [[T F] T T].
 	[[[T F][T T]][[F F][T F]]] is [[[T F] T T] [F F] T F]. 
 	*/
-	linkedList_todoDoesNotHideTheNilAtTheEndSoIsPairsInGeneral,
+	pairList,
 	
 	/** Example: {a b}
 	means (pair a b).
@@ -127,6 +125,12 @@ public enum Syty{
 	TODO also the syntaxes for ST, IF, thenT, and thenConst, which are also used in OcfnUtil.
 	*/
 	sCurryList,
+	
+	/** see SelfRef.ds aka debugstepinator node which is a trinary forest (still redesigning it),
+	which is similar to callquads in occamsfuncer but can have lazyeval view of them in the callpair forest.
+	This allows different cardinalities, such as transfinite vs integers, to work together.
+	*/
+	ds,
 	
 	/** These things dont need their own syntax since can just display like {IF condition ifTrue ifFalse} or something like that?
 	where IF is a var name.
@@ -160,8 +164,9 @@ public enum Syty{
 	//
 	//So to write x = (y [z y z]), you write: <x y [z y z]>, or you write: <x (y [z y z])>,
 	//and THERE IS NO = SYNTAX OTHER THAN <...>.
-	*/
+	*
 	rfpw;
+	*/
 	
 	//This seems an interesting syntax similar to function currying https://en.wikipedia.org/wiki/Fexpr
 	//https://en.wikipedia.org/wiki/S-expression

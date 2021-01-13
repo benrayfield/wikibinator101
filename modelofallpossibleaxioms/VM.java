@@ -1,6 +1,8 @@
 package modelofallpossibleaxioms;
+import java.util.function.ToIntFunction;
 
-public interface VM{
+/** mutable function of λ to int color, as setColor(λ,int) can modify it, but that must not be called by any Axiom */
+public interface VM extends ToIntFunction<λ>{
 	
 	/** the constant node which all trinary forest nodes lead to in all possible paths of node.v node.l node.r.
 	This is not specific to any SetOfAxioms.
@@ -13,6 +15,11 @@ public interface VM{
 	
 	public default λ node(λ l, λ r){
 		return node(leaf(), l, r);
+	}
+	
+	/** color */
+	public default int applyAsInt(λ x){
+		return color(x);
 	}
 	
 	public int color(λ x);

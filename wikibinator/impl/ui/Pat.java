@@ -107,7 +107,7 @@ public class Pat implements CharSequence{
 					syty = Syty.curryList;
 				break;
 				case '[': //[a b c] means {a {b {c λ}}}
-					syty = Syty.linkedList_todoDoesNotHideTheNilAtTheEndSoIsPairsInGeneral;
+					syty = Syty.pairList;
 				break;
 				case '{': //sCurryList example: {I (T x) I}, and about that: <(y x y) {I (T x) I} y>
 					//{...} contains 2 or more things.
