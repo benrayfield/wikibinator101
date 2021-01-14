@@ -1,7 +1,15 @@
 /** Ben F Rayfield offers this software opensource MIT license */
-package modelofallpossibleaxioms;
+package axiomforest.observe;
 
-/** same as modelofallpossibleaxioms.λ but a layer above that with an observed TruthValue.yes or TruthValue.no
+import axiomforest.superposition.λ;
+
+/** A 3 way forest shape where self and all reachable by child pointers
+are each observed to be a specific YES/1 vs NO/0.
+<br><br>
+Renamed this from Observedλ ("Observed" then lowercase lambda) to Λ (capital lambda),
+therefore due to case insensitivity of some systems it had to go in a different java package.
+<br><br>
+same as modelofallpossibleaxioms.λ but a layer above that with an observed TruthValue.yes or TruthValue.no
 with each of them and those TruthValues are part of the forest shape (aka affect merkle ids).
 Since any trinaryForestNodes x and y, if both are true, imply <trinaryForestLeaf x y> is true,
 Or TODO expand that so that <trinaryForestLeaf x y> is true for all x and y regardless of the truth or falseness of x and y???
@@ -19,7 +27,7 @@ would themselves be UnaryOperator<λ> which are axioms, so an optimization of an
 (such as by lazycl to lwjgl opencl/gpu optimize matrix multiply, neuralnets, and other number crunching) is an axiom
 and can go in the same SetOfAxioms. An optimization of an axiom is an axiom.
 */
-public interface Observedλ{
+public interface Λ /*extends λ ??? what about equals and hashCode?*/{
 	
 	/** isLeaf */
 	public boolean a();
@@ -27,23 +35,35 @@ public interface Observedλ{
 	/** TruthValue.yes or TruthValue.no */
 	public boolean tv();
 	
-	public Observedλ v();
+	public Λ v();
 	
-	public Observedλ l();
+	public Λ l();
 	
-	public Observedλ r();
+	public Λ r();
 	
-	/** same forest shape but without the boolean tv.
+	/** Similar to minheap/maxheap indexing, this does multiple calls of v(), l(), and r(),
+	without necessarily creating the objects between.
+	00 is v(). 10 is l(). 01 is r(), or todo reorder those uint2s?. TODO should it use 11 to end the sequence,
+	or 11 means self, or end it with the highest 1 bit?
+	*/
+	public Λ vlr(long sequence);
+	
+	/** like vlr(long) except only does l() and r() so only needs 1 bit per branch, so can go twice as deep for same long.
+	This will be very useful for large bitstrings (cbt).
+	*/
+	public Λ lr(long sequence);
+	
+	/** Superposition aka shapeOnly. Same forest shape but without the boolean tv.
 	Old?... WARNING: may duplicate the whole forest on the first call but cache it probably.
 		TODO fix this by Observedλ automatically having the λ and the bit as fields.
 	Hash ids can exist separately for λ vs Observedλ but normally (if Observedλ works out, TODO?)
 	will only have hash ids for Observedλ.
 	*/
-	public λ shapeOnly();
+	public λ superposition();
 	
 	/** See speed warning (and the TODO how to fix it) in comment of unobserved() */
-	public default boolean conflictsWithLocalBitOf(Observedλ x){
-		return this.shapeOnly().equals(x.shapeOnly()) && this.tv()!=x.tv();
+	public default boolean conflictsWithLocalBitOf(Λ x){
+		return this.superposition().equals(x.superposition()) && this.tv()!=x.tv();
 	}
 	
 	/** by 3+1bit forest shape including boolean tv (TruthValue.yes or TruthValue.no as part of forest shape). */
@@ -55,7 +75,7 @@ public interface Observedλ{
 	/** Returns the one leaf which all paths lead to.
 	This does not depend on which instance λ its called from except they may optimize it different ways.
 	*/
-	public Observedλ leaf();
+	public Λ leaf();
 	
 	/** This could have been a static func, but it seems better to put it here than in (ToIntFunction<λ>)VM.
 	This does not depend on which instance λ its called from except they may optimize it different ways.
@@ -65,15 +85,15 @@ public interface Observedλ{
 	while the other 2 childs (λ.l and λ.r) can be anything when λ.v is leaf,
 	which is the way to start a lambda call of l on r.
 	*/
-	public Observedλ node(boolean tv, Observedλ v, Observedλ l, Observedλ r);
+	public Λ node(boolean tv, Λ v, Λ l, Λ r);
 	
 	/** lazy call l on r (params of this func) */
-	public default Observedλ node(Observedλ l, Observedλ r){
+	public default Λ node(Λ l, Λ r){
 		return node(true, leaf(), l, r);
 	}
 	
 	/** lazy call this on param */
-	public default Observedλ p(Observedλ param){
+	public default Λ p(Λ param){
 		return node(this,param);
 	}
 

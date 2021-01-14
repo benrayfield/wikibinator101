@@ -126,11 +126,13 @@ public enum Syty{
 	*/
 	sCurryList,
 	
-	/** see SelfRef.ds aka debugstepinator node which is a trinary forest (still redesigning it),
+	/** Renaming this to ax for axiomforest node, which is a 3-way forest andOr a 3+1bit way forest above that.
+	see SelfRef.ds aka debugstepinator node which is a trinary forest (still redesigning it),
 	which is similar to callquads in occamsfuncer but can have lazyeval view of them in the callpair forest.
 	This allows different cardinalities, such as transfinite vs integers, to work together.
 	*/
-	ds,
+	ax;
+	//ds,
 	
 	/** These things dont need their own syntax since can just display like {IF condition ifTrue ifFalse} or something like that?
 	where IF is a var name.

@@ -1,3 +1,4 @@
+/** Ben F Rayfield offers this software opensource MIT license */
 package wikibinator;
 import java.util.function.Consumer;
 

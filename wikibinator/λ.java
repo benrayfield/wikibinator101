@@ -1,3 +1,4 @@
+/** Ben F Rayfield offers this software opensource MIT license */
 package wikibinator;
 import static wikibinator.impl.ImportStatic.*;
 import java.util.function.UnaryOperator;
@@ -6,6 +7,10 @@ import immutable.util.TruthValue;
 import wikibinator.Compiled;
 
 public strictfp interface λ extends UnaryOperator<λ>, /*Blob,*/ ob{
+	
+	//TODO use axiomforest.observe.Λ instead of wikibinator.λ or wikibinator.λ implements that
+	//but make sure not to have anything in it that cant be derived within axiomforest
+	//by wikibinator as a UnaryOperator<Λ>
 	
 	/** If true then long header() is 1 of the merkle childs, instead of just L() and R() and isDeterministic.
 	It means that to grow the bloomFilter you have to forkEdit everything upward,

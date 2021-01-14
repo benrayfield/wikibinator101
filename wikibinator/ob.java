@@ -1,3 +1,4 @@
+/** Ben F Rayfield offers this software opensource MIT license */
 package wikibinator;
 
 /** a key in java memory, which may have weaker dedup than globalId

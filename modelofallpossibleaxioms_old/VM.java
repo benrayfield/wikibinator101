@@ -1,7 +1,7 @@
-package modelofallpossibleaxioms.old;
+package modelofallpossibleaxioms_old;
 import java.util.function.ToIntFunction;
 
-import modelofallpossibleaxioms.λ;
+import axiomforest.superposition.λ;
 
 /** mutable function of λ to int color, as setColor(λ,int) can modify it, but that must not be called by any Axiom */
 public interface VM extends ToIntFunction<λ>{

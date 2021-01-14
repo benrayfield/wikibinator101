@@ -1,3 +1,4 @@
+/** Ben F Rayfield offers this software opensource MIT license */
 package wikibinator;
 import static mutable.util.Lg.*;
 import java.lang.ref.SoftReference;

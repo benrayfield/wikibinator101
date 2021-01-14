@@ -11,7 +11,7 @@ other than practical problems like finding a node thats across a network or merk
 */
 public enum Color{
 	
-	Color is derived deterministicly and instantly (bigO(1)) in step, of course allowing for
+	/*Color is derived deterministicly and instantly (bigO(1)) in step, of course allowing for
 	GPU and WIKI to have DFP nodes generated, including their color, and to debugStepOver using those,
 	including SPEND-like ops, which we may evolve a variety of in opensource forks of the VM, in WIKI.
 	
@@ -35,6 +35,7 @@ public enum Color{
 	
 	Spend, wallet, solve, etc calls are still done in the WIKI function, as in Color.wiki,
 	and like GPU optimizations, the WIKI works by accumulating RFP cache entries that are colored consistent together.
+	*/
 	
 	//TODO Optimizations like lwjgl opencl compiling matmul, will create RFP cache entries
 	//which are specific Nodes with specific colors that will fit in as if they had been
@@ -79,25 +80,26 @@ public enum Color{
 	cbt4,
 	cbt8,
 	cbt16,
-	...
-	cbt<2^62>,
+	//...
+	//cbt<2^62>,
 	
 	/** any cbt size that doesnt fit in the specific sizes named by a color (maybe its up to 2^62 bits each?) */
-	cbtBig
+	cbtBig,
 	
 	/** (pair aCbt) like described in the comment of Color.cbt */
 	pair_cbt2,
 	pair_cbt4,
 	pair_cbt8,
-	...
-	pair_cbt<2^62>,
+	//...
+	//pair_cbt<2^62>,
 	pair_cbtBig,
 	
-	FIXME instead of outerjoining cbt with those sizes, should ALL colors be joined with wikibinator HeaderBits heightByte?
+	/*FIXME instead of outerjoining cbt with those sizes, should ALL colors be joined with wikibinator HeaderBits heightByte?
 	So a color would be similar to a heightByte and an opByte but might also have some of the other parts of HeaderBits?
 	Maybe, but try to keep the number of colors fewer, and it has to differ some from just wikibinator
 	since wikibinator is less self-referencing than this, as this ONLY has halted states and every call returns in bigO(1)
 	and you just step more often.
+	*/
 	
 	/** a claim of [[returnVal func param]] where (func param)->returnVal. */
 	RFP,

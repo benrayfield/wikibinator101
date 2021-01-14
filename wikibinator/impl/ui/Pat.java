@@ -119,6 +119,8 @@ public class Pat implements CharSequence{
 				break;
 				*/
 				case '<':
+					syty = Syty.ax;
+					/** OLD...
 					//Theres 0-4 things in <>, and each of them can be expanded to the 4 view, but usually 2-4.
 					//<return func param wikiState>
 					//or <return func param> which means <return func param ?>
@@ -127,8 +129,9 @@ public class Pat implements CharSequence{
 					//<return> means <return ? ? ?>, which means "what are all the possible things that return this?".
 					//<> means <? ? ? ?> which means "what are all the possible tensor4D statements in the universe?"
 					syty = Syty.rfpw;
+					*/
 				break;
-				case '?': //? means TruthValue.unknown for all bits in the dimIndex/pointer/globalId to this object
+				/*case '?': //? means TruthValue.unknown for all bits in the dimIndex/pointer/globalId to this object
 					//? is the only kind of this.
 					syty = Syty.allPossibilities;
 				break;

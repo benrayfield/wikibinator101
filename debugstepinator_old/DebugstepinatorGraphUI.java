@@ -1,5 +1,7 @@
 package debugstepinator_old;
 
+import javax.swing.JPanel;
+
 /** Display the directedGraph of Nodes as its 4 edge types are each a different color of arrow...
 Node.v    --red--> Node.
 Node.l    --green--> Node.
@@ -13,6 +15,6 @@ or the WIKI node will have its own icon and theres only 2 of them
 */
 public class DebugstepinatorGraphUI extends JPanel{
 	
-	TODO
+	//TODO
 
 }

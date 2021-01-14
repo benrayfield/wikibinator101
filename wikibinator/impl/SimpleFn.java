@@ -16,7 +16,7 @@ import wikibinator.λ;
 
 public class SimpleFn implements λ{
 	
-	TODO /** UPDATE: Use WeakReference of what each λ (call) evals to (when thats observed)
+	/** UPDATE: Use WeakReference of what each λ (call) evals to (when thats observed)
 	and keep many parent λ (whose L() is that call and whose R() is what it evals to)
 	in some sorted collection (such as minheap or treemap) sorted by λ.garbcolOrder,
 	so what those WeakReference point to wont be garbcoled until the minheap

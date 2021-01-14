@@ -1,3 +1,4 @@
+/** Ben F Rayfield offers this software opensource MIT license */
 package wikibinator;
 import static mutable.util.Lg.*;
 import static wikibinator.impl.ImportStatic.*; //FIXME this shouldnt be in spec. keep impl separate from this.
