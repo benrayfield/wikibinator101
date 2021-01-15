@@ -324,7 +324,7 @@ public class Cbt extends AbstractNode{
 
 /** a nonhalted lambda. In occamsfuncer a callquad can be halted or nonhalted,
 but here if its halted, use HaltedLambda instead, since it only needs 2 instead of 4 pointers to Node.
-Also it has an isParentsFunc bit to say which of func/L vs parent/R this node is in parent
+Also it has an isParentsFunc bit to say which of func/L vs param/R this node is in parent
 (even if both of those are this child other than the isParentsFunc bit, so the bit is needed).
 */
 public class Callquad extends AbstractNode{
