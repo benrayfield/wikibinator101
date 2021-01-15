@@ -47,8 +47,10 @@ public interface λ{
 	/** param, 1 of 3 trinary forest childs. To start, all you have is leaf, so call that on itself, then you have 2 nodes. */
 	public λ r();
 	
-	/** The +1bit of the 3+1bit childs. TruthValue.yes or TruthValue.no */
+	/** always TruthValue.unknown in λ.
+	The +1bit of the 3+1bit childs. TruthValue.yes or TruthValue.no *
 	public boolean tv();
+	*/
 		
 	/** Similar to minheap/maxheap indexing, this does multiple calls of v(), l(), and r(),
 	without necessarily creating the objects between.

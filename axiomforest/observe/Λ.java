@@ -35,13 +35,13 @@ public interface Λ /*extends λ ??? what about equals and hashCode?*/{
 	/** The +1bit of the 3+1bit childs. TruthValue.yes or TruthValue.no */
 	public boolean tv();
 	
-	/** 1 of 3+1bit childs */
+	/** 1 of 3+1bit childs. If this object is leaf then all 3 of its childs are leaf. */
 	public Λ v();
 	
-	/** 1 of 3+1bit childs */
+	/** 1 of 3+1bit childs. If this object is leaf then all 3 of its childs are leaf. */
 	public Λ l();
 	
-	/** 1 of 3+1bit childs */
+	/** 1 of 3+1bit childs. If this object is leaf then all 3 of its childs are leaf. */
 	public Λ r();
 	
 	/** Similar to minheap/maxheap indexing, this does multiple calls of v(), l(), and r(),
