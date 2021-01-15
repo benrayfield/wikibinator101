@@ -32,13 +32,16 @@ public interface Λ /*extends λ ??? what about equals and hashCode?*/{
 	/** isLeaf */
 	public boolean a();
 	
-	/** TruthValue.yes or TruthValue.no */
+	/** The +1bit of the 3+1bit childs. TruthValue.yes or TruthValue.no */
 	public boolean tv();
 	
+	/** 1 of 3+1bit childs */
 	public Λ v();
 	
+	/** 1 of 3+1bit childs */
 	public Λ l();
 	
+	/** 1 of 3+1bit childs */
 	public Λ r();
 	
 	/** Similar to minheap/maxheap indexing, this does multiple calls of v(), l(), and r(),
@@ -46,12 +49,16 @@ public interface Λ /*extends λ ??? what about equals and hashCode?*/{
 	00 is v(). 10 is l(). 01 is r(), or todo reorder those uint2s?. TODO should it use 11 to end the sequence,
 	or 11 means self, or end it with the highest 1 bit?
 	*/
-	public Λ vlr(long sequence);
+	public default Λ vlr(long sequence) {
+		throw new RuntimeException("Should override this for efficiency, to only create the nodes you need and lazyEval those between later if ever, but also implement it here to make it clear what it does.");
+	}
 	
 	/** like vlr(long) except only does l() and r() so only needs 1 bit per branch, so can go twice as deep for same long.
 	This will be very useful for large bitstrings (cbt).
 	*/
-	public Λ lr(long sequence);
+	public default Λ lr(long sequence){
+		throw new RuntimeException("Should override this for efficiency, to only create the nodes you need and lazyEval those between later if ever, but also implement it here to make it clear what it does.");
+	}
 	
 	/** Superposition aka shapeOnly. Same forest shape but without the boolean tv.
 	Old?... WARNING: may duplicate the whole forest on the first call but cache it probably.

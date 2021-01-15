@@ -2,7 +2,7 @@
 package wikibinatorDatastructsBeforeCompileThemAllToAxiomforest.nodes;
 import wikibinatorDatastructsBeforeCompileThemAllToAxiomforest.Node;
 
-public class HaltedLambda{
+public class HaltedLambda extends AbstractNode{
 	
 	public HaltedLambda(Node func, Node param){
 		super(func,param);

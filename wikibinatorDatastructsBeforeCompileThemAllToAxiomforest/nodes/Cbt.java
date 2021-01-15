@@ -6,5 +6,9 @@ import wikibinatorDatastructsBeforeCompileThemAllToAxiomforest.Node;
 Cbt aka complete binary tree of bits (pair of pair... of T or F).
 */
 public class Cbt extends AbstractNode{
+	
+	public Node step(){
+		return this;
+	}
 
 }

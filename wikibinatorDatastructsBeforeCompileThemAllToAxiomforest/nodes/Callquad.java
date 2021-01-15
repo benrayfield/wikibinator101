@@ -1,5 +1,6 @@
 /** Ben F Rayfield offers this software opensource MIT license */
 package wikibinatorDatastructsBeforeCompileThemAllToAxiomforest.nodes;
+import axiomforest.observe.Λ;
 import wikibinatorDatastructsBeforeCompileThemAllToAxiomforest.Node;
 
 /** a nonhalted lambda. In occamsfuncer a callquad can be halted or nonhalted,
@@ -31,6 +32,10 @@ public class Callquad extends AbstractNode{
 	
 	public Opcode t_or_f_isParentsFunc(){
 		return (Opcode)get(4);
+	}
+	
+	public Node step(){
+		throw new RuntimeException("TODO debugStepInto. If you want to debugStepOver you need a Callquad and a Rfpd, in a DebugStepOver node");
 	}
 
 }

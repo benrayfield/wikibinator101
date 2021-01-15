@@ -17,9 +17,13 @@ is both yes and no at once aka bull.
 datastructThatHas3AxiomnodesWhere2OfThemAreSameShapeAndIfTheyHave2DifferentBitValuesThenTheThird
 AxiomnodeIsForkeditedToBeOppositeOfItsValueAsWayToSpreadErrors
 */
-public class SpreadError extends AbstractNode{
+public class SpreadError_old extends AbstractNode{
 	
-	public SpreadError(Rfpd cacheKeyA, Rfpd cacheKeyB, Node messenger){
+	//FIXME merge MultiReturnDetector with SpreadError? Or have a MADNode type
+	//(lets call it No.java which is not T or F but is something whose axiom value is always no,
+	//and Yes.java's axiom value is always yes.
+	
+	public SpreadError_old(Rfpd cacheKeyA, Rfpd cacheKeyB, No messenger){
 		super(cacheKeyA, cacheKeyB, messenger);
 	}
 	
@@ -29,6 +33,11 @@ public class SpreadError extends AbstractNode{
 	
 	public Rfpd cacheKeyB(){
 		return (Rfpd)get(1);
+	}
+	
+	/** the mutually assured destruction happens when anything proves No is Yes (in axiom value of No) */
+	public No mad(){
+		return (No)get(2);
 	}
 
 }

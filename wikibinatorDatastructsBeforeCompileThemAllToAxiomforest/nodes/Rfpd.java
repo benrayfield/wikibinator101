@@ -22,5 +22,9 @@ public class Rfpd extends AbstractNode{
 	public Node param(){
 		return get(2);
 	}
+	
+	public Node step(){
+		return this;
+	}
 
 }

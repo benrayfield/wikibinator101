@@ -1,6 +1,7 @@
 /** Ben F Rayfield offers this software opensource MIT license */
 package axiomforest.superposition;
 
+import axiomforest.observe.Λ;
 import immutable.util.TruthValue;
 
 /** immuable trinary forest node where all paths lead to leaf. Does not have any truthvalue or color,
@@ -27,7 +28,8 @@ public interface λ{
 	public TruthValue tv();
 	*/
 	
-	/** vmState, 1 of 3 trinary forest childs. When vmState is leaf, func and param can be anything,
+	/** The +1bit of the 3+1bit childs. TruthValue.yes or TruthValue.no.
+	VmState, 1 of 3 trinary forest childs. When vmState is leaf, func and param can be anything,
 	so to start a lambda call of anything on anything (even the stuff found inside vmState,
 	which can see into using λ.v(), λ.l(), and λ.r() recursively, and λ.a() to check when you've reached the leaf,
 	and practically there will be any size bitstrings wrapped in cbt (see occamsfuncer and wikibinator docs about cbt)),
@@ -45,6 +47,9 @@ public interface λ{
 	/** param, 1 of 3 trinary forest childs. To start, all you have is leaf, so call that on itself, then you have 2 nodes. */
 	public λ r();
 	
+	/** The +1bit of the 3+1bit childs. TruthValue.yes or TruthValue.no */
+	public boolean tv();
+		
 	/** Similar to minheap/maxheap indexing, this does multiple calls of v(), l(), and r(),
 	without necessarily creating the objects between.
 	00 is v(). 10 is l(). 01 is r(), or todo reorder those uint2s?. TODO should it use 11 to end the sequence,
