@@ -19,6 +19,7 @@ I still need the λ objects (3-way) to match forest shapes efficiently.
 */
 public interface λObserver{
 	
+	/** is a yes. Start from here, and impliesYes and joiner to get everything possible. */
 	public λ leaf();
 	
 	/** If param is true then it implies the return is true */
@@ -26,6 +27,13 @@ public interface λObserver{
 	
 	/** If param is true then it implies the return is false */
 	public Set<UnaryOperator<λ>> impliesNo();
+	
+	/** of trinaryForestNodes: forall x forall y: <trinaryForestLeaf x y> is YES, regardless of x and y being YES andOr NO,
+	which allows a halted lambda to see any nonhalted part of the system such as to generate a custom kind of id of it
+	and to compute statements about all possible statements that can be said in the system but only about 1 at a time.
+	This returns <trinaryForestLeaf x y> for its 2 params x y.
+	*/
+	public BinaryOperator<λ> joiner();
 	
 	/* Λ.tv() is opposite my tv() but without having to know either,
 	similar to from any corner of a hypercube the corners can be divided into 2 groups those of even vs odd parity,
@@ -38,7 +46,7 @@ public interface λObserver{
 	See https://github.com/benrayfield/hypercubewave smooth curves about parity, which is the display of
 	about 2^100 voxels of a 100 dimensional hypercube whose corners are each white or black depending
 	on the parity of all paths length from any chosen corner and is trivially just log number of copy move invert average. 
-	*/
+	*
 	public Set<UnaryOperator<λ>> odd();
 	
 	/* Λ.tv() is equal to my tv() but without having to know either,
@@ -52,14 +60,8 @@ public interface λObserver{
 	See https://github.com/benrayfield/hypercubewave smooth curves about parity, which is the display of
 	about 2^100 voxels of a 100 dimensional hypercube whose corners are each white or black depending
 	on the parity of all paths length from any chosen corner and is trivially just log number of copy move invert average.
-	*/
+	*
 	public Set<UnaryOperator<λ>> even();
-	
-	/** of trinaryForestNodes: forall x forall y: <trinaryForestLeaf x y> is YES, regardless of x and y being YES andOr NO,
-	which allows a halted lambda to see any nonhalted part of the system such as to generate a custom kind of id of it
-	and to compute statements about all possible statements that can be said in the system but only about 1 at a time.
-	This returns <trinaryForestLeaf x y> for its 2 params x y.
 	*/
-	public BinaryOperator<λ> joiner();
 	
 }
