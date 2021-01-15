@@ -54,6 +54,312 @@ public class InfiniteSetContains extends AbstractNode{
 	}
 
 }
+
+/** a claim that a certain Callquad (a nonhalted lambda call) will not halt.
+You may Believe.java this or claim it without a Believe (as you may claim anything with or without a Believe,
+but if you claim it and a Rfpd is found where it does halt, then (TODO create a MultiReturnDetector for
+nonhalting vs halting on a specific value, or should Rfpd be able to represent nonhalting such as
+using (S I I (S I I)) which is a callquad as the normed form all nonhalters?).
+TODO add an axiom that (S I I (S I I)) WontHalt, and an axiom that anything which has
+a nonhalting child callquad is itself nonhalting (even if it ignores that callquad
+such as (T x anythingThatHalts)->x but (T x anyNonhalter) does not halt.
+<br><br>
+There are a few general categories of halting vs nonhalting...
+<br><br>
+-- halter (a kind of infiniteLoop of length 1 since x.step->x).
+<br><br>
+-- infiniteLoop (length > 1) which are anything where x.step.step.step... leads back to x.
+<br><br>
+-- leadsToInfiniteLoop which is anything which does not come back to itself but leads to an infiniteLoop.
+<br><br>
+-- foreverExpander which is any nonhalter that is not a infiniteLoop or leadsToInfiniteLoop.
+<br><br>
+If x is a halter or infiniteLoop or leadsToInfiniteLoop, that can be proven in finite time and memory
+(though may be so large a "finite" number that we would never figure that out).
+<br><br>
+The last 3 of those 4 things WontHalt. TODO be more specific about it?
+*/
+public class WontHalt extends AbstractNode{
+	
+	public WontHalt(Callquad call){
+		super(call);
+	}
+	
+	public Callquad call(){
+		return (Callquad)get(0);
+	}
+
+}
+
+/** This can be used in parallel such as (S x y z) evals to ((x z)(y z)) aka (x z (y z)).
+Each of (x z) and (y z) may be an S call, which is very common, so could continue becoming more parallel,
+or do it sequentially. Each such call can be precomputed such as by lwjgl opencl GPU optimization,
+to create a Rfpd for (x z) and a Rfpd for (y z) so if both of those already exist
+then they can be used with 2 DebugStepOver
+(created by 2 GetRfpdfromCallquadIf, from the callquads it was computed in),
+so it is still 2 sequential steps of CallQuad -> DebugStepOver -> CallQuad -> DebugStepOver -> CallQuad,
+but thats bigO(1) and those DebugStepOver can each be any huge amount of work done in parallel,
+and together they generate a Rfpd of the whole (S x y z) call which can be used the same way
+anywhere someone wants to know what happens when you call (S x y) on z, what does that return,
+the Rfpd tells the returnValue for that (func param),
+and if someone makes up a fake return value, then those 2 Rfpds can go in a MultiReturnDetector
+which will check (in STEP from it) if they both have the same func and param but different returns,
+and if they do then it proves that the axiom TruthValue of No is Truthvalue.yes (and its also Truthvalue.no),
+and many MutuallyAssuredDestructionIf already each have 2 childs: No and anyRandomlyChosenNode,
+and No (if its yes) implies anyRandomlyChosenNode is the NOT of its current TruthValue
+(or implies its both separately, todo choose a design, should it have to know a current yes or no
+to choose the opposite or just do both in 2 separate STEPs), so thats what protects the system
+from people andOr computers making up, or just accidentally computing it wrong,
+the wrong returnValue for a (func param) lambda call,
+which is most likely to happen or be used by DebugStepOver and Rfpd.
+<br><br>
+datastructThatSomehowDoesDebugstepoverUsingSomethingLike2CallquadsButTodoWhich2SpecificDatastructs.
+*/
+public class DebugStepOver extends AbstractNode{
+	
+	/** If cacheKey's func and param matches the func and param the call wants to know returnVal for,
+	then this IMPLIES far ahead in the calculation aka debugStepOver it instead of debugStepInto,
+	but if its not a match then this IMPLIES (todo choose a design,
+	either debugStepInto or implies some constant thats always true).
+	*/
+	public DebugStepOver(Callquad call, Rfpd cacheKey){
+		super(call, cacheKey);
+	}
+	
+	public Callquad call(){
+		return (Callquad)get(0);
+	}
+	
+	public Rfpd cacheKey(){
+		return (Rfpd)get(1);
+	}
+	
+	public Node step(){
+		//new GetRfpdFromCallquadIf(call()).step()
+		if(
+			call().func().equals(cacheKey().func()
+			&& call().param().equals(cacheKey().param()
+			&& (HaltedLambda) .. (call.func call.param).isHalted
+		){ //do debugStepOver, returning a HaltedLambda
+			"then return that (HaltedLambda) .. (call.func call.param).isHalted"
+		}else{ //is not the cacheKey needed or was not ready to debugStepOver
+			throw new RuntimeException("TODO return this? or do a debugStepInto? Or return Yes (no-op)?");
+		}
+	}
+
+}
+
+/** This system cant prove its own correctness, but if an axiom generates an axiom that generates an axiom
+that generates an axiom ... many levels deep, it is still possible to trace it back to the set of
+axiomforest nodes which led to this node, the same as if they were not generated axioms
+but just data generated by a single axiom, since code is data,
+and if no MutuallyAssuredDestruction (blockchain-fork or bits of logic forking in 1 computer)
+happens while being extremely redundantly cross-referenced by turing-complete-challenge-response,
+then we can gain confidence over time that some set of axioms (that generate axioms that generate axioms)
+never generate anything that contradicts anything else (TruthValue.bull).
+<br><br>
+This system does not provide a way to generate the first GeneratedAxioms
+but does provide a way for various people andOr computers to experiment with combos of them
+and see if contradictions are found, and choose to continue that in various combos.
+The way you do that is add an axiom where Yes implies a specific GeneratedAxiom,
+which might (TODO choose a design) fit in a Rfpd or something similar to a Rfpd
+which is the same way Rfpds in the wiki are added since wiki (1 of the wikibinator opcodes)
+is the only nondeterminism in the system (except maybe statements in the axiomforest that cant be proven or disproven?).
+I'll create a Node type for that right now, which is called Believe.
+<br><br>
+datastructWrappingAHaltedLambdaInThe(Axiomnode.v)Child)ThatsClaimedToBeAValidAxiomBased
+OnTheVShapeAndStepFuncCreatesWhatever<bit,v,l,r>ItSaysToWithoutVerifyingIt
+*/
+public class GeneratedAxiom extends AbstractNode{
+	
+	public GeneratedAxiom(HaltedLambda callThisOnA_ViewNodeAsHaltedLambda){
+		super(callThisOnA_ViewNodeAsHaltedLambda);
+	}
+	
+	public HaltedLambda callThisOnA_ViewNodeAsHaltedLambda(){
+		return (HaltedLambda)get(0);
+	}
+
+}
+
+/** In some cases (depending what is halted),
+(callquad.cacheKey.func callquad.cacheKey.param)->(callquad.func callquad.param).
+(callquad.func callquad.param) is a HaltedLambda.
+(callquad.cacheKey.func callquad.cacheKey.param) is normally a HaltedLambda but
+technically might be nonhalted aka a callquad with no stack (is it null or leaf or what constant?) and no cacheKey.
+<br><br>
+TODO should callquad be used directly as Rfpd instead of this class?
+*/
+public class GetRfpdFromCallquadIf extends AbstractNode{
+	
+	public GetRfpdFromCallquadIf(Callquad call){
+		super(call);
+	}
+	
+	public Callquad call(){
+		return (Callquad)get(0);
+	}
+	
+	public Rfpd impliesRfpd(){
+		throw new RuntimeException("TODO read comment of this class, and return null if it doest imply that, else generate the Rfpd it implies");
+	}
+
+}
+
+public class HaltedLambda extends AbstractNode{
+	
+	public HaltedLambda(Node func, Node param){
+		super(func,param);
+	}
+	
+	public Node func(){
+		return get(0);
+	}
+	
+	public Node param(){
+		return get(1);
+	}
+
+}
+
+/**  No, Yes, T, and F, are 4 different things. Yes, T, and F are axiom value TruthValue.yes.
+No is axiom value TruthValue.no, or is TruthValue.bull when used
+as a peaceful-just-forking mutuallyAssuredDestructionTrigger.
+<br><br>
+You should have these MutuallyAssuredDestructionIf nodes pointing from No to every other Node
+(at least in abstract math)
+or randomly selected nodes, which force blockchain-fork or logic-in-1-computer-fork if any BULL is proven,
+to fork to a possible state of the system which is less likely to have any BULL,
+and many possible states (merkle forest nodes) explored in many combos at once,
+so mutually assured destruction is about a "multiverse branch" and you probably wont even notice it
+cuz theres so many of them happening at once, like "error correcting codes" except
+in a more extreme way to motivate convergence toward 0 errors in the p2p network.
+Errors slow things down and break compatibility and the whole system would destroy itself
+if it wasnt instantly ready to back out of any even slightly wrong calculation in many combos.
+This is like the "control rod" of the wikibinator system and it operates at a precision
+between .01 seconds and .00001 seconds,
+closer to .00001 except when OS gives another thread control for a short time
+or during lwjgl opencl gpu optimizations that do a block of calculations such as in .005 seconds.
+The worst that will happen is blockchain-fork OR whatever people might hook in to
+read the system and react in ways that only they are responsible for and not the system itself.
+<br><br>
+If No (aka have proved true==false) then this proves the opposite TruthValue about any given statement (target).
+<br><br>
+This is a kind of (peaceful) "mutually assured destruction" (MAD)
+on the level of blockchain-forking or logic forking in the bits of 1 computer,
+that it must fork if an error can be derived anywhere in the system,
+enforced by the axioms allow using a proof that true==false to prove anything about anything.
+<br><br>
+In MultiReturnDetector (todo rewrite this as its supposed to imply No (is yes) QUOTE
+If cacheKeyA.func().equals(cacheKeyB.func()) && cacheKeyA.param().equals(cacheKeyB.param())
+&& !cacheKeyA.ret().equals(cacheKeyB.ret()) && this node is true THEN implies the opposite TruthValue (yes or no)
+about whatever messenger is, so that messenger is both yes and no at once, so messenger is bull,
+and the same way those 2 conflicting Rfpds about messenger can imply that any node in the system
+is both yes and no at once aka bull.
+UNQUOTE.
+*/
+public class MutuallyAssuredDestructionIf extends AbstractNode{
+	
+	/** No (TruthValue.bull) else Node elseOneOfManyTargets (bull).
+	Its a mutually assured destruction of any bull anywhere implies bull everywhere,
+	cuz if you can prove that true==false then you can prove anything,
+	and we need to motivate removing that before it spreads errors in less obvious ways.
+	*/
+	public MutuallyAssuredDestructionIf(No noBull, Node elseOneOfManyTargetsBecomesBull){
+		super(noBull, elseOneOfManyTargetsBecomesBull);
+	}
+	
+	/** No's axiom value is TruthValue.no.
+	But if it also has axiom value TruthValue.yes, thats TruthValue.bull,
+	and any bull triggers MutuallyAssuredDestruction everywhere that expands exponentially,
+	and peers cant deny the bull if they've certified things that derived the bull as any set of nodes
+	reachable thru childs of childs recursively, if any joins and implies of combos of those can generate bull,
+	then it proves at least 1 thing in that set is the cause of bull and must fork. Many combos can be tried
+	as its a merkle forest, and its not bull on a peer themself but on some things but not others they shared.
+	*/
+	public No noBull(){
+		return (No)get(0);
+	}
+	
+	/** becomes TruthValue.bull (simultaneous yes and no) so the MutuallyAssuredDestruction expands exponentially */
+	public Node elseOneOfManyTargetsBecomesBull(){
+		return get(1);
+	}
+
+}
+
+/** No, Yes, T, and F, are 4 different things. Yes, T, and F are axiom value TruthValue.yes.
+No is axiom value TruthValue.no, or is TruthValue.bull when used
+as a peaceful-just-forking mutuallyAssuredDestructionTrigger.
+<br><br>
+No's axiom value is always no.
+If this is implied to be yes as axiom value,
+then a "mutually assured destruction" (at blockchain level, or logic in 1 computer) forking happens.
+<br><br>
+When a STEP returns No, its like a no-op if the No's axiom value is TruthValue.no (Λ has a yes/no bit,
+always observed, while λ's axiom value is TruthValue.unknown).
+If STEP returns a No whose TruthValue is TruthValue.yes (then a No of TruthValue.bull comes soon after that)
+then MutuallyAssuredDestructionIf of No and any target Node can spread the error exponentially
+as the web of many MutuallyAssuredDestructionIf allow eachother to activate,
+motivating near everyone in the network to work together
+to not allow any set of axioms that can prove yes==no aka bull.
+*/
+public class No extends AbstractNode{
+	
+	public Node step(){
+		return this;
+	}
+}
+
+/** This is for efficient bitstrings of any size.
+Cbt aka complete binary tree of bits (pair of pair... of T or F).
+*/
+public class Cbt extends AbstractNode{
+	
+	public Node step(){
+		return this;
+	}
+
+}
+
+/** a nonhalted lambda. In occamsfuncer a callquad can be halted or nonhalted,
+but here if its halted, use HaltedLambda instead, since it only needs 2 instead of 4 pointers to Node.
+Also it has an isParentsFunc bit to say which of func/L vs parent/R this node is in parent
+(even if both of those are this child other than the isParentsFunc bit, so the bit is needed).
+*/
+public class Callquad extends AbstractNode{
+	
+	public Callquad(Node func, Node param, Callquad stack, Rfpd cacheKey, Opcode t_or_f_isParentsFunc){
+		super(func, param, stack, cacheKey, t_or_f_isParentsFunc);
+	}
+	
+	public Node func(){
+		return get(0);
+	}
+	
+	public Node param(){
+		return get(1);
+	}
+	
+	public Callquad stack(){
+		return (Callquad)get(2);
+	}
+	
+	public Rfpd cacheKey(){
+		return (Rfpd)get(3);
+	}
+	
+	public Opcode t_or_f_isParentsFunc(){
+		return (Opcode)get(4);
+	}
+	
+	public Node step(){
+		throw new RuntimeException("TODO debugStepInto. If you want to debugStepOver you need a Callquad and a Rfpd, in a DebugStepOver node");
+	}
+
+}
+
+...etc...
 ```
 
 TODO fix broken links, as things moved in the java packages...
