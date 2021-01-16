@@ -2,7 +2,7 @@ package modelofallpossibleaxioms_old;
 
 import java.util.function.ToIntFunction;
 
-import axiomforest.superposition.λ;
+import axiomforest_old.superposition.λ;
 
 /** Immutable. An axiom can be a set of axioms by using more colors or deeper patterns of trinary forest nodes.
 Axioms are consistent as long as no possible combo of calling (λ)node(λ,λ,λ) and next(λ)

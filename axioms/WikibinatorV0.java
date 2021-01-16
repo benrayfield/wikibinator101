@@ -1,6 +1,6 @@
 /** Ben F Rayfield offers this software opensource MIT license */
 package axioms;
-import axiomforest.observe.Λ;
+import axiomforest_old.observe.Λ;
 
 public class WikibinatorV0{
 	

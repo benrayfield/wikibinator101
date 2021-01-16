@@ -1,6 +1,6 @@
 package modelofallpossibleaxioms_old;
 
-import axiomforest.superposition.λ;
+import axiomforest_old.superposition.λ;
 
 /** Immutable. */
 public class MultiColoredλ extends RuntimeException{

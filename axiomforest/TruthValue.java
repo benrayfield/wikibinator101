@@ -1,7 +1,7 @@
 package axiomforest;
 
-import wikibinatorV0.impl.Bull;
-import wikibinatorV0.impl.Unknown;
+import wikibinator100.impl.Bull;
+import wikibinator100.impl.Unknown;
 
 /** Unknown is the default answer for every question,
 which may become yes or no but if it becomes both at once
