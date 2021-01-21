@@ -1,4 +1,6 @@
 # wikibinator
+Newer version at https://github.com/benrayfield/wikibinator104/ (in progress)
+
 A decentralized wiki style interactive math book (for ages 0 to expert, which TODO will appear like cartoony art with drag and drop or hardcore number crunching tools that hook into cloud computing tools etc depending on the user's skill), based on a combinator (that is both a universal lambda function and a pattern calculus function of 6 parameters which has vararg lambdas) in which it is extremely easier to say true things than to say false things, based on a logic similar to godel-number where one must commit to statements about lambda called on lambda returns lambda before one can verify which lambdas they are, and in theory scaleable enough for graphics, musical instruments, GPU number crunching, etc, but lets start simple, so everyone can understand and fit the pieces of the puzzle together.
 
 Will be built on this layer: https://github.com/benrayfield/axiomforest
