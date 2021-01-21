@@ -2,18 +2,18 @@
 package wikibinator101.wikibinatornodes;
 import java.util.AbstractList;
 import java.util.Iterator;
-
-import axiomforest_old.observe.Λ;
-import axiomforest_old.superposition.λ;
+import axiomforest.*;
 
 public abstract class AbstractNode extends AbstractList<Node> implements Node{
 	
-	/** TruthValue.yes or TruthValue.no about is the 3-way forest shape of this node a true statement or not */
-	public final boolean tv;
+	/** the new way it can be any of the 4 truthvalues.
+	OLD: TruthValue.yes or TruthValue.no about is the 3-way forest shape of this node a true statement or not.
+	*/
+	public final TruthValue tv;
 	
 	protected final Node[] childs;
 	
-	public AbstractNode(boolean tv, Node... childs){
+	public AbstractNode(TruthValue tv, Node... childs){
 		this.tv = tv;
 		this.childs = childs;
 	}
@@ -46,24 +46,25 @@ public abstract class AbstractNode extends AbstractList<Node> implements Node{
 		return isLeaf(); //FIXME is Node leaf different from the Λ leaf which might be a lower level than Nodes?
 	}
 	
-	public boolean tv(){
-		throw new RuntimeException("FIXME should Node extend axiomforest.observe.Λ vs axiomforest.superposition.λ ?"
-			+" Id like to make Λ extend λ but I dont want them to Object.equals (and hashCode), so TODO think about that.");
+	public TruthValue tv(){
+		return tv;
+		//throw new RuntimeException("FIXME should Node extend axiomforest.observe.Λ vs axiomforest.superposition.λ ?"
+		//	+" Id like to make Λ extend λ but I dont want them to Object.equals (and hashCode), so TODO think about that.");
 	}
 	
-	public Λ v(){
+	public Node v(){
 		throw new RuntimeException("TODO I havent decided how to map between Node and Λ yet. Need wikibinator implemented as Nodes to pass testcases first.");
 	}
 	
-	public Λ l(){
+	public Node l(){
 		throw new RuntimeException("TODO I havent decided how to map between Node and Λ yet. Need wikibinator implemented as Nodes to pass testcases first.");
 	}
 	
-	public Λ r(){
+	public Node r(){
 		throw new RuntimeException("TODO I havent decided how to map between Node and Λ yet. Need wikibinator implemented as Nodes to pass testcases first.");
 	}
 	
-	public λ superposition(){
+	public Node superposition(){
 		throw new RuntimeException("TODO");
 	}
 	
@@ -75,11 +76,11 @@ public abstract class AbstractNode extends AbstractList<Node> implements Node{
 		throw new RuntimeException("TODO be very careful about this as it must match Λ.hashCode(). See the throw/comment of equals(Object).");
 	}
 	
-	public Λ leaf(){
+	public Node leaf(){
 		return Leaf.instance; //FIXME is Λ leaf the same forest shape as Node leaf in axiomforest? Probably, but todo think more about that.
 	}
 	
-	public Λ node(boolean tv, Λ v, Λ l, Λ r){
+	public Node node(TruthValue tv, Node v, Node l, Node r){
 		throw new RuntimeException("TODO");
 	}
 	

@@ -6,7 +6,7 @@ Cbt aka complete binary tree of bits (pair of pair... of T or F).
 */
 public class Cbt extends AbstractNode{
 	
-	public Cbt(boolean tv){
+	public Cbt(TruthValue tv){
 		super(tv); //TODO more params
 	}
 	

@@ -26,6 +26,29 @@ public class HashUtil{
 		}catch(NoSuchAlgorithmException e){ throw new Error(e); }
 	}
 	
+	public static long[] sha3_256(long... b){
+		try{
+			return hash(MessageDigest.getInstance("SHA3-256"), b);
+		}catch(NoSuchAlgorithmException e){ throw new Error("TODO include an implementation of the hash algorithm for if JVM doesnt have one, and use it at least 1 out of every 10000 times to compare its output to the JVMs one. Do that even if JVM has it, TODO.", e); }
+	}
+	
+	public static long[] hash(MessageDigest md, long... hashMe){
+		md.reset();
+		//copy longs into MessageDigest as bigEndian
+		for(long j : hashMe) for(int shift=56; shift>=0; shift-=8) md.update((byte)(j>>shift));
+		byte[] hashBytes = md.digest();
+		if((hashBytes.length&7)!=0) throw new RuntimeException("Hash output is not a multiple of 8 bytes: "+hashBytes.length);
+		long[] hashLongs = new long[hashBytes.length>>3];
+		for(int i=0; i<hashLongs.length; i++){ //copy hashBytes to hashLongs as bigEndian
+			long j = 0;
+			for(int k=0; k<8; k++){
+				j = (j<<8)|(hashBytes[k]&0xff);
+			}
+			hashLongs[i] = j;
+		}
+		return hashLongs;
+	}
+	
 	/** last 32 bits of sha256 of utf8 of the string,
 	for creating "magic numbers" that work between people who dont try to create collisions
 	in low thousands of unique things, such as the CoreType and Op enums

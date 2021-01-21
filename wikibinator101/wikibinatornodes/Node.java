@@ -2,7 +2,7 @@
 package wikibinator101.wikibinatornodes;
 import java.util.List;
 
-import axiomforest_old.observe.Λ;
+import axiomforest.λ;
 
 /** Immutable. I'm planning to get the various kinds of Nodes working together,
 as a way to help me design their final form in axiomforest where theres only 1 type that does it all.
@@ -22,7 +22,7 @@ as a way to help me design their final form in axiomforest where theres only 1 t
 		datastructThatSomehowDoesDebugstepoverUsingSomethingLike2CallquadsButTodoWhich2SpecificDatastructs
 		datastructThatHasARFPDAndAnotherRAndItLeadsToTheClaimThatTheOtherReturn(R)InARFPDIsFalseIfRFPDIsTrueCuzTheresMaxOneReturnValuePerFuncParam
 */
-public interface Node extends List<Node>, Λ{
+public interface Node extends List<Node>, λ{
 	
 	//FIXME should Node extend axiomforest.observe.Λ vs axiomforest.superposition.λ ?
 	//Id like to make Λ extend λ but I dont want them to Object.equals (and hashCode), so TODO think about that.

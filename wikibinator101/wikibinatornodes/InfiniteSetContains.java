@@ -1,5 +1,6 @@
 /** Ben F Rayfield offers this software opensource MIT license */
 package wikibinator101.wikibinatornodes;
+import axiomforest.TruthValue;
 import wikibinatorV0.datastructsBeforeCompileThemAllToAxiomforest.Node;
 
 /** This can be used to ask a turing-complete question
@@ -35,7 +36,7 @@ public class InfiniteSetContains extends AbstractNode{
 	
 	"TODO T F kind vs simplerDoesItHaltOrNot kind"
 	
-	public InfiniteSetContains(boolean tv, HaltedLambda infiniteSet, Node memberOfSet){
+	public InfiniteSetContains(TruthValue tv, HaltedLambda infiniteSet, Node memberOfSet){
 		super(tv, infiniteSet, memberOfSet);
 	}
 	

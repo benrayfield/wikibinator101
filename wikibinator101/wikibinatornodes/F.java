@@ -6,7 +6,7 @@ as a peaceful-just-forking mutuallyAssuredDestructionTrigger.
 */
 public class F extends AbstractNode{
 	
-	public F(boolean tv){
+	public F(TruthValue tv){
 		super(tv); //FIXME more params?
 	}
 	

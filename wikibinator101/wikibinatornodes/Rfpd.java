@@ -1,11 +1,13 @@
 /** Ben F Rayfield offers this software opensource MIT license */
 package wikibinator101.wikibinatornodes;
 
+import axiomforest.TruthValue;
+
 /** rfpd aka <returnVal func param isDeterministic> */ 
 public class Rfpd extends AbstractNode{
 	
 	/** isDeterministic is part of the Node */
-	public Rfpd(boolean tv, Node ret, Node func, Node param){
+	public Rfpd(TruthValue tv, Node ret, Node func, Node param){
 		super(tv, ret, func, param);
 	}
 	
